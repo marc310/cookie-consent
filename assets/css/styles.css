@@ -274,5 +274,38 @@ body {
   text-align: justify;
 }
 
+.cookie_floater {
+  display: none;
+  background-color: white;
+  border-radius: 50%;
+  width: max-content;
+  /* display: flex; */
+  position: absolute;
+  bottom: 1em;
+  left: 1em;
+}
+.cookie_floater:hover{
+  cursor: pointer;
+}
+.cookie_floater img {
+  width: 4em;
+  animation-name: spin;
+  animation-duration: 5000ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear; 
+  /* transform: rotate(3deg); */
+   /* transform: rotate(0.3rad);/ */
+   /* transform: rotate(3grad); */ 
+   /* transform: rotate(.03turn);  */
+}
+
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+}
 
 /* COOKIE SECTIONS */

@@ -24,13 +24,22 @@ const front = document.querySelector(".front");
 const back = document.querySelector(".back");
 const more = document.querySelector("#more_cookie");
 const backicon = document.querySelector(".back_icon");
+const cookieFloater = document.querySelector(".cookie_floater");
+
+const allowCookies = document.querySelector('#allowCookies');
+const declineCookies = document.querySelector('#declineCookies');
+const confirmCookies = document.querySelector('#confirmCookies');
 
 //-------------------------------------------------------
 // Visual Actions
 //-------------------------------------------------------
 
 close.addEventListener("click", function () {
-  cookie.style.display = "none";
+    floaterVisible()
+});
+
+cookieFloater.addEventListener("click", function () {
+  floaterHide()
 });
 
 more.addEventListener("click", () => {
@@ -42,6 +51,15 @@ backicon.addEventListener("click", () => {
   back.style.display = "none";
   front.style.display = "flex";
 });
+
+front = () => {
+
+}
+
+cookiePreferences = () => {
+
+}
+
 
 const tab = document.querySelector(".tab");
 const liEl = tab.getElementsByTagName("li");
@@ -66,10 +84,8 @@ for (let i = 0; i < liEl.length; i++) {
 // Functional Actions
 //-------------------------------------------------------
 
-const inputs = [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
-const allowCookies = document.querySelector('#allowCookies');
-const declineCookies = document.querySelector('#declineCookies');
-const confirmCookies = document.querySelector('#confirmCookies');
+// const inputs = [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
+
 
 
 function  isEmptyParam(a) {
@@ -126,18 +142,14 @@ allowAllCookies = () => {
     console.log('allow all cookies')
 }
 
-// checkCookie = () => {
-//     var cookieEnabled = navigator.cookieEnabled;
-//     if (!cookieEnabled){ 
-//         document.cookie = "testcookie";
-//         cookieEnabled = document.cookie.indexOf("testcookie")!=-1;
-//     }
-//     return cookieEnabled || showCookieFail();
-// }
-
-// showCookieFail = () => {
-//     console.log('check cookie failed')
-// }
+listCookies = () => {
+    var theCookies = document.cookie.split(';');
+    var aString = '';
+    for (var i = 1 ; i <= theCookies.length; i++) {
+        aString += i + ' ' + theCookies[i-1] + "\n";
+    }
+    return aString;
+}
 
 getFormPref = () => {
     return [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
@@ -149,34 +161,51 @@ getAllPref = () => {
 prepareCookies = (preferences, action = 'setCookie') => {
     // prepare cookies recebe as preferencias
     // e salva os cookies de acordo com as preferencias setadas
-    if (preferences.length > 1) {
-        // console.log('teste ' + preferences.length)
-        for (let i = 0; i < preferences.length; i++){
-            //  console.log(preferences[i])
-            // activatePreference= window[preferences[i]]()
+    // caso nao tenha nada selecionado ele apaga todas as configs
+    if (preferences.length < 1) {
+        let allPrefs = getAllPref()
+        for (let i = 0; i < allPrefs.length; i++){
             try {
-                (async () => {
-                    let script= await getCookieConfig(preferences[i])
-                    let configName = conf.name + space + preferences[i]
-                    const d = new Date();
-                    d.setTime(d.getTime() + (24*60*60*1000));
-                    let expires = d.toUTCString()
-
-                        if (action === 'setCookie') {
-                            var output= CookieManage.setCookie(configName, script, expires);
-                        }
-                        else if (action === 'deleteCookie') {
-                            var output= CookieManage.deleteCookie(configName);
-                        }
-
-                })()
-                } catch(err) {
-                    console.log(err)
-                }
+                let configName = conf.name + space + allPrefs[i]
+                var output= CookieManage.deleteCookie(configName);
+            } catch(err) {
+                console.log(err)
             }
+        }
+    }
+    //
+    for (let i = 0; i < preferences.length; i++){
+        try {
+            (async () => {
+                let script= await getCookieConfig(preferences[i])
+                let configName = conf.name + space + preferences[i]
+                const d = new Date();
+                d.setTime(d.getTime() + (24*60*60*1000));
+                let expires = d.toUTCString()
+
+                    if (action === 'setCookie') {
+                        var output= CookieManage.setCookie(configName, script, expires);
+                    }
+                    else if (action === 'deleteCookie') {
+                        var output= CookieManage.deleteCookie(configName);
+                    }
+
+            })()
+        } catch(err) {
+            console.log(err)
+        }
     }
 }
 
+
+floaterVisible = () => {
+    cookie.style.display = "none";
+    cookieFloater.style.display = "flex";
+}
+floaterHide = () => {
+    cookie.style.display = "block";
+    cookieFloater.style.display = "none";
+}
 
 
 //-------------------------------------------------------
@@ -192,6 +221,8 @@ confirmCookies.addEventListener("click", ()=> {
     const pref = getFormPref();
     prepareCookies(pref, setCookie)
     // cookiePreferences = pref.toString().split(/\s*;\s*/)
+    floaterVisible()
+
 });
 
 declineCookies.addEventListener("click", ()=> {
@@ -200,6 +231,8 @@ declineCookies.addEventListener("click", ()=> {
     // TODO... script to delete all prefs returned on get all pref function
     prepareCookies(allPrefs, deleteCookie)
     // var output= CookieManage.deleteCookie("testCookie");
+    floaterVisible()
+
 });
 
 
