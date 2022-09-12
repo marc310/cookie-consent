@@ -1,6 +1,5 @@
 
 {
-
     "marketing" : [{
         "value": "facebook script"
     }],
@@ -9,6 +8,8 @@
     }],
     "analytics" : [{
         "value": "one line script track google analytics"
+    }],
+    "third-part" : [{
+        "value": "one line script track google analytics"
     }]
-
 }

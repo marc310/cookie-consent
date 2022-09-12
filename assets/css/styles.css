@@ -121,8 +121,28 @@ body {
   display: none;
 }
 
+.back_icon, .back_icons{
+  display: flex;
+  width: auto;
+}
+.back_icon:hover {
+  cursor: pointer;
+}
+
+.header-cookies {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.back_icon svg {
+  width: 1.25em;
+  margin-right: 1em;
+}
+
 .cookie .back_icons {
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
 }
 
 .cookie .back_icons i {
@@ -134,8 +154,8 @@ body {
 }
 
 .cookie .back h1 {
-  margin: 0px;
-  margin-bottom: 20px;
+  /* margin: 0px; */
+  /* margin-bottom: 20px; */
   font-size: 22px;
 }
 

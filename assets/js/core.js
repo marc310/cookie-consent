@@ -1,9 +1,22 @@
 
+
+const configFile = './assets/js/config.json'
+
+const conf = {
+    name : 'Kess',
+    description: 'kess entire description',
+    url: 'https://kessgame.com/',
+    privacyPage: 'privacy.html',
+    termsPage: 'terms.html'
+}
+
+
 //-------------------------------------------------------
 // Objects
 //-------------------------------------------------------
 
-const configFile = './assets/js/config.json'
+const comma = ',',
+      space = ' '
 
 const close = document.querySelector(".close");
 const cookie = document.querySelector(".cookie");
@@ -11,7 +24,6 @@ const front = document.querySelector(".front");
 const back = document.querySelector(".back");
 const more = document.querySelector("#more_cookie");
 const backicon = document.querySelector(".back_icon");
-
 
 //-------------------------------------------------------
 // Visual Actions
@@ -101,42 +113,13 @@ CookieManage = {
 
 
 getCookieConfig = (value) => {
-    console.log(value)
-    fetch(configFile).then(res => res.json()).then(data => {
-        // i = 0
-        // debugger
-        // let configValue = value
-        console.log(data)
-        // let configData = data.configValue[i].value
-        // console.log(configData)
-        // debugger
-        return configData
+    let func = value
+    return fetch(configFile).then(res => res.json()).then(data => {
+        let configName = func
+        let configCookie = data[configName][0].value
+        // console.log(configCookie)
+        return configCookie
     })
-}
-
-analytics = () => {
-    // function pra ativar o analytics 
-    console.log('analytics function activated successfully')
-
-    // fetch(configFile).then(res => res.json()).then(data => {
-    //     i = 0
-    //     // debugger
-    //     // console.log(data.colors[i].color)
-    //     let configData = data.analytics[i].google
-    //     // console.log(configData)
-    //     // debugger
-    //     return configData
-    // })
-}
-
-marketing = () => {
-    // function pra ativar o marketing 
-    console.log('marketing function activated successfully')
-}
-
-performance = () => {
-    // function pra ativar o performance 
-    console.log('performance function activated successfully')
 }
 
 allowAllCookies = () => {
@@ -159,18 +142,39 @@ allowAllCookies = () => {
 getFormPref = () => {
     return [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
 }
+getAllPref = () => {
+    return [...document.querySelectorAll('[data-function]')].filter((el) => el).map((el) => el.getAttribute('data-function'));
+}
 
-prepareCookies = (preferences) => {
+prepareCookies = (preferences, action = 'setCookie') => {
     // prepare cookies recebe as preferencias
     // e salva os cookies de acordo com as preferencias setadas
     if (preferences.length > 1) {
         // console.log('teste ' + preferences.length)
         for (let i = 0; i < preferences.length; i++){
             //  console.log(preferences[i])
-             activatePreference= window[preferences[i]]()
-        }
+            // activatePreference= window[preferences[i]]()
+            try {
+                (async () => {
+                    let script= await getCookieConfig(preferences[i])
+                    let configName = conf.name + space + preferences[i]
+                    const d = new Date();
+                    d.setTime(d.getTime() + (24*60*60*1000));
+                    let expires = d.toUTCString()
+
+                        if (action === 'setCookie') {
+                            var output= CookieManage.setCookie(configName, script, expires);
+                        }
+                        else if (action === 'deleteCookie') {
+                            var output= CookieManage.deleteCookie(configName);
+                        }
+
+                })()
+                } catch(err) {
+                    console.log(err)
+                }
+            }
     }
-    // console.log('preparing preferences : ' + preferences)
 }
 
 
@@ -179,15 +183,23 @@ prepareCookies = (preferences) => {
 // Event Listeners
 //-------------------------------------------------------
 
+const setCookie = 'setCookie'
+const deleteCookie = 'deleteCookie'
+
+
 confirmCookies.addEventListener("click", ()=> {
     // pega as preferencias do formulario escolhidas pelo usuario
     const pref = getFormPref();
-    prepareCookies(pref)
+    prepareCookies(pref, setCookie)
     // cookiePreferences = pref.toString().split(/\s*;\s*/)
 });
 
 declineCookies.addEventListener("click", ()=> {
-    var output= CookieManage.deleteCookie("testCookie");
+    let allPrefs = getAllPref()
+    // console.log(allPrefs)
+    // TODO... script to delete all prefs returned on get all pref function
+    prepareCookies(allPrefs, deleteCookie)
+    // var output= CookieManage.deleteCookie("testCookie");
 });
 
 
