@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Consent</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <!-- inner body -->
+
+    <div class="cookie">
+        <div class="close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g opacity="0.5">
+                <path d="M18 6L6 18" stroke="#273240" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 6L18 18" stroke="#273240" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </g>
+            </svg>
+        </div>
+
+    <div class="front">
+
+        <h1>Privacy Preference Center</h1>
+        <p>When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to.</p>
+        <div class="front__buttons">
+            <button id="allowCookies" type="submit">Allow All</button>
+            <button id="declineCookies" type="submit">Decline unnecessary cookies</button>
+        </div>
+        <div class="front__footer">
+            <a href="#" id="more_cookie">Manage Consent Preferences</a>
+        </div>
+        <div>
+            <a href="#" class="learn_more">Learn More</a>
+        </div>
+        
+    </div>
+    <div class="back">
+        <div class="back_icons">
+            <i class="fas fa-arrow-left back_icon"></i>
+        </div>
+        <h1>Manage Consent Preferences</h1>
+
+        <form>
+            <ul class="tab">
+                <li>
+                    <i class="fas fa-plus"></i>
+                    <h2>Strictly Necessary Cookies</h2>
+                    <span class="baged">Always Active</span>
+                </li>
+                <div class="data2">
+                    <p>These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.</p>
+                </div>
+
+                <li>
+                    <i class="far fa-minus"></i>
+                    <h2>Performance Cookies</h2>
+                    <label  class="custom_checkbox">
+                        <input type="checkbox" data-function="performance">
+                        <span class="toogle"></span>
+                    </label>
+                </li>
+                <div class="data2">
+                    <p>These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.</p>
+                </div>
+
+                <li>
+                    <i class="far fa-minus"></i>
+                    <h2>Analytics Cookies</h2>
+                    <label  class="custom_checkbox">
+                        <input type="checkbox" data-function="analytics">
+                        <span class="toogle"></span>
+                    </label>
+                </li>
+                <div class="data2">
+                    <p>These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.</p>
+                </div>
+
+
+                <li>
+                    <i class="fas fa-plus"></i>
+                    <h2>Marketing Cookies</h2>
+                    <label  class="custom_checkbox">
+                        <input type="checkbox" data-function="marketing">
+                        <span class="toogle"></span>
+                    </label>
+                </li>
+                <div class="data2">
+                    <p>These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.</p>
+                </div>
+            </ul>
+            <div class="back_footer">
+                <input id="confirmCookies" type="submit" value="Confirm my choices">
+            </div>
+        </form>
+
+    </div>
+    </div>
+    
+    <!-- inner body -->
+    
+</body>
+</html>
+
+<script src="assets/js/core.js"></script>

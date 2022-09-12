@@ -1,0 +1,14 @@
+
+{
+
+    "marketing" : [{
+        "value": "facebook script"
+    }],
+    "performance" : [{
+        "value": "cookie script"
+    }],
+    "analytics" : [{
+        "value": "one line script track google analytics"
+    }]
+
+}

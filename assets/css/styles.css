@@ -1,0 +1,258 @@
+@import url("https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&display=swap");
+* {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  background-color: #8ba8ff;
+  font-family: "Mulish", sans-serif;
+  margin: 5px;
+}
+
+.cookie {
+  background-color: #fff;
+  border-radius: 15px;
+  max-width: 600px;
+  position: relative;
+  padding: 80px 60px;
+}
+
+.cookie .close {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding: 10px;
+  border: 1px solid #eef1f9;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cookie .front {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.cookie .front h1 {
+  margin: 0px;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.cookie .front p {
+  line-height: 26px;
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
+.cookie .front__buttons {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-bottom: 70px;
+}
+
+.cookie .front__buttons button {
+  padding: 15px 38px;
+  font-size: 14px;
+  background-color: #273240;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cookie .front__buttons button + button {
+  margin-left: 20px;
+}
+
+.cookie .front__footer {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.cookie .front__footer a {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 26px;
+  text-decoration: none;
+  color: #273240;
+  padding: 10px 25px;
+  border: 1px solid #d7dff8;
+  border-radius: 3px;
+}
+
+.cookie .front .learn_more {
+  display: inline-block;
+  color: #243bc5;
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.cookie .back {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  display: none;
+}
+
+.cookie .back_icons {
+  margin-bottom: 10px;
+}
+
+.cookie .back_icons i {
+  font-size: 25px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  border: 1px solid #eef1f9;
+}
+
+.cookie .back h1 {
+  margin: 0px;
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.cookie .back .tab {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  list-style: none;
+  border: 1px solid #d7dff8;
+}
+
+.cookie .back .tab li {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 25px 20px;
+  border-bottom: 1px solid #979797;
+  cursor: pointer;
+}
+
+.cookie .back .tab li h2 {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.cookie .back .tab li i {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.cookie .back .tab li .baged {
+  margin-left: auto;
+  padding: 5px 10px;
+  background-color: #f6f8ff;
+  border-radius: 9999px;
+  font-size: 14px;
+  color: #28305d;
+  font-weight: bold;
+}
+
+.cookie .back_footer {
+  margin-top: 30px;
+}
+
+.cookie .back_footer input {
+  padding: 15px 38px;
+  background-color: #273240;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.custom_checkbox {
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.custom_checkbox input {
+  display: none;
+}
+
+.custom_checkbox input:checked + span::before {
+  left: 32px;
+  -webkit-transition-duration: 350ms;
+          transition-duration: 350ms;
+  background-color: #243bc5;
+}
+
+.custom_checkbox span {
+  display: block;
+  width: 65px;
+  border: 1px solid #d1d8eb;
+  height: 35px;
+  border-radius: 17.5px;
+  position: relative;
+}
+
+.custom_checkbox span::before {
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  left: 2px;
+  background-color: #757d96;
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  content: "";
+}
+
+.data2 {
+  display: none;
+  background-color: #f6f8ff;
+  padding: 20px 40px;
+  -webkit-transition-duration: 450ms;
+          transition-duration: 450ms;
+}
+
+.data2.active {
+  display: block;
+}
+
+.data2 p {
+  line-height: 26px;
+  font-size: 16px;
+  text-align: justify;
+}
+
+
+/* COOKIE SECTIONS */
