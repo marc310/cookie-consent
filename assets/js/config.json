@@ -1,15 +1,13 @@
 
+
 {
     "marketing" : [{
-        "value": "facebook script"
-    }],
-    "performance" : [{
-        "value": "cookie script"
+        "src": "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop"
     }],
     "analytics" : [{
-        "value": "one line script track google analytics"
+        "src": "one line script track google analytics"
     }],
-    "third-part" : [{
-        "value": "one line script track google analytics"
+    "third-party" : [{
+        "src": "https://widget.gleamjs.io/e.js"
     }]
 }
