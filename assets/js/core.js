@@ -7,21 +7,7 @@ const conf = {
     description: 'kess entire description',
     url: 'https://kessgame.com/',
     privacyPage: 'privacy.html',
-    termsPage: 'terms.html',
-    consents : {
-        analytics: {
-            src: "",
-            wanted: null,
-        },
-        marketing: {
-            src: "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop",
-            wanted: null,
-        },
-        giveaway: {
-            src: "https://widget.gleamjs.io/e.js",
-            wanted: null,
-        }
-    }
+    termsPage: 'terms.html'
 }
 
 const createElement = (elementName, attribute) => {
@@ -209,16 +195,9 @@ LocalStrManage = {
 
 createHeadScript('application/javascript', 'https://unpkg.com/yett')
 
-// var js = document.createElement('script');
-// js.setAttribute("type", "application/javascript");
-// js.setAttribute("src", "https://unpkg.com/yett");
-// document.head.appendChild(js);
-
-
 //-------------------------------------------------------
 // Whitelisting Consent Actions
 //-------------------------------------------------------
-// consentSaved.split(/\s*:\s*/) or consentSaved.toString().split(/\s*;\s*/)
 const consent = {
     name: conf.name,
     sufix: '_Consent',
@@ -286,16 +265,16 @@ checkCookieConfig = () => {
     if (!CookieManage.getCookie(conf.name)){
         // console.log('cookie consent nao existe') entao cria o script por padrao
         consentBarShow()
-            createGiveawayScript('application/javascript', conf.consents.giveaway.src)
-            createHeadScript('application/javascript', conf.consents.marketing.src)
+            createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
+            createHeadScript('application/javascript', consent.cookies.marketing.src)
     } else {
         // consent existe entao verifica a validação do consent 
         let consentActive = JSON.parse(CookieManage.getCookie('Kess'))
         floaterVisible()
         if (consentActive.value == false){
-            createGiveawayScript('application/blocked', conf.consents.giveaway.src)
+            createGiveawayScript('application/blocked', consent.cookies.giveaway.src)
         }else {
-            createGiveawayScript('application/javascript', conf.consents.giveaway.src)
+            createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
         }
     }
     // return cookie
@@ -384,7 +363,7 @@ prepareCookies = (preferences, action = 'setCookie') => {
     for (let i = 0; i < preferences.length; i++){
         try {
             (async () => {
-                let script= await getCookieScript(preferences[i])
+                // let script= await getCookieScript(preferences[i])
                 let configName = conf.name + space + preferences[i]
                 
                 let expires = 15
@@ -392,9 +371,10 @@ prepareCookies = (preferences, action = 'setCookie') => {
                     if (action === 'setCookie') {
                         // var output= CookieManage.setCookie(configName, script, expires);
                         let formPref = consent.cookies[preferences[i]]
+                        console.log(formPref.wanted)
                         formPref.wanted = true
-                        setCookieConsent(false)
                         setCookieConsent(JSON.stringify(consent))
+                        // setCookieConsent(false)
                         // cria elementos relacionados a escolha do usuario
                         // esses elementos sao scripts direcionados ao head ou ao elemento alvo
                         // JSON.parse(CookieManage.getCookie('Kess'))
@@ -427,8 +407,8 @@ allowAll = () => {
         console.log('vc esta aceitando pela primeira vez')
     }else {
         window.yett.unblock()
-        createGiveawayScript('application/javascript', conf.consents.giveaway.src)
-        createHeadScript('application/javascript', conf.consents.marketing.src)
+        createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
+        createHeadScript('application/javascript', consent.cookies.marketing.src)
     }
 
 }
