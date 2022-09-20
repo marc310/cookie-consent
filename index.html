@@ -23,10 +23,7 @@
     <div class="col-12 data-aos" data-aos="fade-up" data-aos-delay="150" data-aos-anchor-placement="top-bottom">
         <div class="text-center aos-item__inner">
             <a class="e-widget no-button" href="https://gleam.io/1vxLy/kessgamecom-500-giveaway" rel="nofollow">KessGame.Com $500 Giveaway</a>
-            <!-- <script type="application/javascript" src="https://widget.gleamjs.io/e.js" async="true"></script> -->
-            <div id="giveaway_script">
-                
-            </div>    
+            <div id="giveaway_script"></div>    
         </div>
     </div>
 
@@ -52,7 +49,7 @@
         </div>
         <div class="front">
             <h1>Privacy Preference Center</h1>
-            <p>When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to our <a href="#" id="privacy">Privacy Policy</a>.</p>
+            <p>When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to our <a href="https://kessgame.com/privacy.html" id="privacy">Privacy Policy</a>.</p>
             <div class="front__buttons">
                 <button id="allowCookies" type="submit">Allow All</button>
                 <button id="declineCookies" type="submit">Decline unnecessary cookies</button>
@@ -88,9 +85,21 @@
                     
                     <li>
                         <i class="fas fa-plus"></i>
+                        <h2>Analytics Cookies</h2>
+                        <label  class="custom_checkbox">
+                            <input type="checkbox" data-function="analytics" id="chk_analytics">
+                            <span class="toogle"></span>
+                        </label>
+                    </li>
+                    <div class="data2">
+                        <p>These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.</p>
+                    </div>
+
+                    <li>
+                        <i class="fas fa-plus"></i>
                         <h2>Marketing Cookies</h2>
                         <label  class="custom_checkbox">
-                            <input type="checkbox" data-function="marketing">
+                            <input type="checkbox" data-function="marketing" id="chk_marketing">
                             <span class="toogle"></span>
                         </label>
                     </li>
@@ -99,9 +108,9 @@
                     </div>
                     <li>
                         <i class="fas fa-plus"></i>
-                        <h2>Third-Party Cookies</h2>
+                        <h2>Third-Party Giveaway Cookies</h2>
                         <label  class="custom_checkbox">
-                            <input type="checkbox" data-function="giveaway">
+                            <input type="checkbox" data-function="giveaway" id="chk_giveaway">
                             <span class="toogle"></span>
                         </label>
                     </li>

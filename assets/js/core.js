@@ -31,16 +31,26 @@ createHeadScript = (type, url) => {
 
 const giveaway = document.querySelector("#giveaway_script");
 createGiveawayScript = (type, url) => {
-    let script = createElement('script', {
-        type: type,
-        src: url
-    })
-    giveaway.appendChild(script);
+    if (document.querySelector("#giveaway_script")){
+        let script = createElement('script', {
+            type: type,
+            src: url
+        })
+        giveaway.appendChild(script);
+    } else {
+        return false
+    }
+
 }
 
 const timeNow = () => {
     let data = new Date()
     return data.getTime()
+}
+
+const dateNow = () => {
+    let data = new Date()
+    return dataFormatada = (data.getFullYear() + "/" + ((data.getMonth() + 1)) + "/" + (data.getDate() ))
 }
 
 
@@ -117,6 +127,25 @@ cookiePreferences = () => {
 cookieMorePreferences = () => {
     front.style.display = "none";
     back.style.display = "flex";
+}
+
+
+
+const tab = document.querySelector(".tab");
+const liEl = tab.getElementsByTagName("li");
+
+for (let i = 0; i < liEl.length; i++) {
+  const element = liEl[i];
+  element.addEventListener("click", function () {
+    const iEl = element.getElementsByTagName("i")[0];
+    const data = element.nextElementSibling;
+    if (iEl.className == "far fa-minus") {
+      iEl.classList.value = "fas fa-plus";
+    } else {
+      iEl.classList.value = "far fa-minus";
+    }
+    data.classList.toggle("active");
+  });
 }
 
 
@@ -200,25 +229,26 @@ createHeadScript('application/javascript', 'https://unpkg.com/yett')
 //-------------------------------------------------------
 const consent = {
     name: conf.name,
-    sufix: '_Consent',
     value: true,
-    date: timeNow(),
+    date: dateNow(),
+    timestamp: timeNow(),
     domain: conf.url,
     cookies : {
         analytics: {
             src: "",
-            wanted: null,
+            wanted: null
         },
         marketing: {
             src: "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop",
-            wanted: null,
+            wanted: null
         },
         giveaway: {
             src: "https://widget.gleamjs.io/e.js",
-            wanted: null,
+            wanted: null
         }
     }
 }
+
 
 
 //-------------------------------------------------------
@@ -231,15 +261,15 @@ getAllCookies = () => document.cookie.split(';').reduce((ac, str) => Object.assi
 
 // get cookie script values from JSON config file
 // this function return the src value
-getCookieScript = (value) => {
-    let func = value
-    return fetch(configFile).then(res => res.json()).then(data => {
-        let configName = func
-        let configCookie = data[configName][0].src
-        console.log(configCookie)
-        return configCookie
-    })
-}
+// getCookieScript = (value) => {
+//     let func = value
+//     return fetch(configFile).then(res => res.json()).then(data => {
+//         let configName = func
+//         let configCookie = data[configName][0].src
+//         console.log(configCookie)
+//         return configCookie
+//     })
+// }
 
 listCookies = () => {
     var theCookies = document.cookie.split(';');
@@ -260,21 +290,57 @@ getAllPref = () => {
 
 // verifica o local storage e assinala as atribuiçoes de configurações
 checkCookieConfig = () => {
-    // debugger
     // procura configurações na maquina local
+    // ou melhor rodar um foreach nas configurações locais do cookie e verificar
+    // quais wanted = true pra cada um setar o checkbox pra true pegando o elemento
+    // pelo id ex: document.getElementById('giveaway').checked = true
+    // pra diferenciar setar os ids como check_'nome'
+    // pegar o consent e gerar o form de opções
     if (!CookieManage.getCookie(conf.name)){
         // console.log('cookie consent nao existe') entao cria o script por padrao
+        // default setup when user not accepted or declined
         consentBarShow()
-            createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
-            createHeadScript('application/javascript', consent.cookies.marketing.src)
+        createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
+        createHeadScript('application/javascript', consent.cookies.marketing.src)
     } else {
         // consent existe entao verifica a validação do consent 
         let consentActive = JSON.parse(CookieManage.getCookie('Kess'))
         floaterVisible()
+        let localCookies = JSON.parse(CookieManage.getCookie('Kess'))
+        for (const [key, value] of Object.entries(localCookies.cookies)) {
+            // aqui eu percorro um for pelas configurações setadas da ultima vez
+            // console.log(`${key}: ${value}`);
+            let wanted = localCookies.cookies[key].wanted
+            let input = document.getElementById('chk_' + key)
+            input.checked = wanted == true ? wanted : false
+        }
         if (consentActive.value == false){
+            // when user declined for our cookies
             createGiveawayScript('application/blocked', consent.cookies.giveaway.src)
         }else {
-            createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
+            // consent = true entao deve-se verificar quais as configurações atraves do atributo wanted
+            // console.log(localCookies);
+            for (const [cookie, value] of Object.entries(localCookies.cookies)) {
+                // aqui eu percorro um for pelas configurações setadas da ultima vez
+                // console.log(`${cookie}: ${value}`);
+                let c = cookie
+                let cookieAttr = localCookies.cookies[c]
+                // console.log(cookieAttr)
+                if (cookieAttr.wanted === true){
+                    if(c === 'giveaway'){
+                        createGiveawayScript('application/javascript', cookieAttr.src)
+                    } else {
+                        createHeadScript('application/javascript', cookieAttr.src)
+                    }
+                }
+
+                // let wanted = localCookies.cookies[key].wanted
+                // let input = document.getElementById('chk_' + key)
+                // input.checked = wanted == true ? wanted : false
+            }
+            // createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
+            // createHeadScript('application/javascript', consent.cookies.marketing.src)
+
         }
     }
     // return cookie
@@ -291,16 +357,10 @@ setCookieConsent = (key) => {
 // se nao houver configurações entao é o primeiro acesso
 // cria um cookie local e salva as configurações default
 // se o usuario assinala grava as novas configs
-// configurações existentes e criadas entao inicia a configuração do whitelist
-// cria objeto whitelist e atribui os scripts
-// inicia o whitelist
-
-
 //-------------------------------------------------------
 // Starting App
 //-------------------------------------------------------
 checkCookieConfig()
-
 //-------------------------------------------------------
 // Basic Log
 //-------------------------------------------------------
@@ -320,77 +380,81 @@ checkCookieConfig()
 
 
 
-const tab = document.querySelector(".tab");
-const liEl = tab.getElementsByTagName("li");
-
-for (let i = 0; i < liEl.length; i++) {
-  const element = liEl[i];
-  element.addEventListener("click", function () {
-    const iEl = element.getElementsByTagName("i")[0];
-    const data = element.nextElementSibling;
-    if (iEl.className == "far fa-minus") {
-      iEl.classList.value = "fas fa-plus";
-    } else {
-      iEl.classList.value = "far fa-minus";
-    }
-    data.classList.toggle("active");
-  });
-}
-
-
-
 //-------------------------------------------------------
 // Cookie Preparation
 //-------------------------------------------------------
 
 
-prepareCookies = (preferences, action = 'setCookie') => {
+prepareCookies = (preferences, action = 'setCookie', form = false) => {
     // prepareCookies tem por padrao a ação de inserir 'setCookie'
     // console.log(preferences)
-    // debugger
-    if (preferences.length < 1) {
+    // console.log(preferences.length)
+    if (preferences.length < 1 || preferences === 'all') {
+        // debugger
         let allPrefs = getAllPref()
         for (let i = 0; i < allPrefs.length; i++){
             try {
-                let configName = conf.name + space + allPrefs[i]
-                var output= CookieManage.deleteCookie(configName);
+                // let configName = conf.name + space + allPrefs[i]
+                // var output= CookieManage.deleteCookie(configName);
+                let cookiePref = allPrefs[i]
+                consent.cookies[cookiePref].wanted = true
+                setCookieConsent(JSON.stringify(consent))
             } catch(err) {
                 console.log(err)
             }
         }
-    }
-    //
-    for (let i = 0; i < preferences.length; i++){
-        try {
-            (async () => {
+    } else if(form === true) {
+        for (let i = 0; i < preferences.length; i++){
+            let formPref = consent.cookies[preferences[i]]
+            formPref.wanted = true
+            setCookieConsent(JSON.stringify(consent))
+        }
+        setTimeout(() => {
+            console.log("Refreshing page in 1 second.");
+            window.location.reload()
+          }, "1000")
+    } else {
+        //
+        for (let i = 0; i < preferences.length; i++){
+            try {
                 // let script= await getCookieScript(preferences[i])
                 let configName = conf.name + space + preferences[i]
-                
                 let expires = 15
-
+                
                     if (action === 'setCookie') {
                         // var output= CookieManage.setCookie(configName, script, expires);
                         let formPref = consent.cookies[preferences[i]]
-                        console.log(formPref.wanted)
+                        // TODO..
+                        // console.log([i])
+                        // console.log(formPref.src)
+                        // debugger
+                        // console.log(formPref.wanted)
                         formPref.wanted = true
+                        // console.log(formPref.wanted)
+                        // debugger
                         setCookieConsent(JSON.stringify(consent))
+
+                        // JSON.parse(CookieManage.getCookie('Kess'))
                         // setCookieConsent(false)
                         // cria elementos relacionados a escolha do usuario
-                        // esses elementos sao scripts direcionados ao head ou ao elemento alvo
-                        // JSON.parse(CookieManage.getCookie('Kess'))
                         // const givescript = document.createElement('div')
                         // givescript.innerHTML = script;
                         // document.getElementById("giveaway-script").appendChild(givescript);
                     }
                     else if (action === 'deleteCookie') {
-                        var output= CookieManage.deleteCookie(configName);
+                        consent.cookies[preferences[i]].wanted = false
+                        consent.value = false
+                        setCookieConsent(JSON.stringify(consent))
+                        // var output= CookieManage.deleteCookie(configName);
                     }
-
-            })()
-        } catch(err) {
-            console.log(err)
+                    
+            } catch(err) {
+                console.log(err)
+            }
         }
     }
+    window.location.reload()
+
 }
 
 
@@ -398,20 +462,33 @@ prepareCookies = (preferences, action = 'setCookie') => {
 // Event Listeners
 //-------------------------------------------------------
 const allPrefs = getAllPref()
-allowAll = () => {
-    // prepareCookies(allPrefs, setCookie)
-    // debugger
-    // setCookieConsent(true)
-    if (!CookieManage.getCookie(conf.name)){
-        setCookieConsent(JSON.stringify(consent))
-        console.log('vc esta aceitando pela primeira vez')
-    }else {
-        window.yett.unblock()
-        createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
-        createHeadScript('application/javascript', consent.cookies.marketing.src)
-    }
 
-}
+// acceptCookies = () => {
+//     if (!CookieManage.getCookie(conf.name)){
+//         setCookieConsent(JSON.stringify(consent))
+//         console.log('vc esta aceitando pela primeira vez') 
+//     }else {
+//         window.yett.unblock()
+//         createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
+//         createHeadScript('application/javascript', consent.cookies.marketing.src)
+//     }
+// }
+
+// allowAll = () => {
+//     // prepareCookies(allPrefs, setCookie)
+//     // debugger
+//     // setCookieConsent(true)
+//     // TODO.. precisa setar todos os wanted pra true
+//     if (!CookieManage.getCookie(conf.name)){
+//         setCookieConsent(JSON.stringify(consent))
+//         console.log('vc esta aceitando pela primeira vez') 
+//     }else {
+//         window.yett.unblock()
+//         createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
+//         createHeadScript('application/javascript', consent.cookies.marketing.src)
+//     }
+
+// }
 
 cookieSettings.addEventListener("click", () => {
     cookieWrapper.style.display = "flex";
@@ -421,32 +498,36 @@ cookieSettings.addEventListener("click", () => {
 confirmCookies.addEventListener("click", ()=> {
     // pega as preferencias do formulario escolhidas pelo usuario
     const pref = getFormPref();
-    prepareCookies(pref, setCookie)
+    prepareCookies(pref, setCookie, true)
+    debugger
     // cookiePreferences = pref.toString().split(/\s*;\s*/)
     floaterVisible()
-
+    window.location.reload()
 });
 
 consentGive.addEventListener("click", () => {
-    allowAll()
+    // allowAll()
+    prepareCookies('all', setCookie)
     consentBarHide()
     floaterVisible()
+    // window.location.reload()
+
 })
 
 allowCookies.addEventListener("click", ()=> {
-    allowAll()
+    // allowAll()
+    prepareCookies('all', setCookie)
     floaterVisible()
+    // window.location.reload()
+
 });
 
 
 declineCookies.addEventListener("click", ()=> {
     prepareCookies(allPrefs, deleteCookie)
     floaterVisible()
-    giveaway.setAttribute('type', 'javascript/blocked')
-    consent.value = false
-    setCookieConsent(JSON.stringify(consent))
-
-    window.location.reload()
+    // giveaway.querySelector('script').setAttribute('type', 'javascript/blocked')
+    // window.location.reload()
 });
 
 

@@ -305,12 +305,13 @@ body {
   position: fixed;
   bottom: 2em;
   left: 1em;
+  z-index: 99999;
 }
 .cookie_floater:hover{
   cursor: pointer;
 }
 .cookie_floater img {
-  width: 2.6em;
+  width: 2.2em;
   z-index: 99;
   animation-name: spin;
   animation-duration: 5000ms;
@@ -322,21 +323,21 @@ body {
    /* transform: rotate(.03turn);  */
 }
 .cookie_floater span {
-  background-color: rgba(0, 0, 0, 0.65);
+  background-color: rgba(0, 0, 0, 0.76);
   color: white;
   height: fit-content;
-  padding: .45em .95em;
+  padding: .45em 1.45em;
   border-radius: 1em;
   transform: translateX(-80px);
   opacity: 0;
   z-index: 98;
   transition: transform .3s ease-in-out;
   transition-delay: .1s;
-  font-size: .635em;
+  font-size: .735em;
 }
 
-.cookie_floater:hover > span {
-  transform: translateX(0);
+.cookie_floater > span {
+  transform: translateX(-12px);
   opacity: 1;
 }
 
