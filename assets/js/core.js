@@ -1,15 +1,75 @@
 
+/* ************************************************************
+:: Project Name: Cookie Consent Script
+:: Project Author Name: Marcelo Motta
+:: Project Author URI: https://marcelomotta.com
+:: Project URI: https://github.com/marc310/cookie-consent
+:: Version: 1.0.0
+:: Created: 22 Set 2022
+************************************************************ */
+
+//-------------------------------------------------------
+// Cookie Functional Actions
+//-------------------------------------------------------
+isEmptyParam = (a) => {
+    if (a == undefined || a == "") {
+        return true
+    } else {
+        return false
+    }
+}
+
+CookieManage = {
+	getCookie: function (c) {
+        var b = document.cookie;
+        var e = c + "=";
+        var d = b.indexOf("; " + e);
+        if (d == -1) {
+            d = b.indexOf(e);
+            if (d != 0) {
+                return null
+            }
+        } else {
+            d += 2
+        }
+        var a = document.cookie.indexOf(";", d);
+        if (a == -1) {
+            a = b.length
+        }
+        return unescape(b.substring(d + e.length, a))
+    },
+    setCookie: function (b, d, a, c) {
+        var e = new Date();
+        e.setDate(e.getDate() + a);
+        window.document.cookie = b + "=" + escape(d) + ";path=/" + ((isEmptyParam(a)) ? "" : ";expires=" + e.toUTCString()) + ((isEmptyParam(c)) ? ";" : ";")
+    },
+    deleteCookie: function (a) {
+        if (CookieManage.getCookie(a)) {
+            CookieManage.setCookie(a, "", -1, "")
+        }
+    }
+}
 
 
 //-------------------------------------------------------
-// Basic Cookies Script Setup
+// Local Storage Functional Actions
 //-------------------------------------------------------
-const conf = {
-    name : 'Kess',
-    description: 'kess entire description',
-    url: 'https://kessgame.com/',
-    privacyPage: 'privacy.html',
-    termsPage: 'terms.html'
+LocalStrManage = {
+	setLocalStorage:function(a,b) {
+        window.localStorage.setItem(a, b);
+    },
+    getLocalStorage: function (a) {
+        var c = window.localStorage.getItem(a);
+        if ( c != null) {
+            
+            return c;
+        } else {
+            return "";
+        }
+    },
+    deleteLocalStorage: function (a) {
+        window.localStorage.removeItem(a);
+    }
 }
 
 
@@ -26,6 +86,17 @@ const dateNow = () => {
 
 
 //-------------------------------------------------------
+// Basic Cookies Script Setup
+//-------------------------------------------------------
+const conf = {
+    name : Cookies.preferences.name ? Cookies.preferences.name : 'Cookie Consent',
+    description: Cookies.preferences.description ? Cookies.preferences.description : 'Cookie notice bars are not enough!',
+    url: Cookies.preferences.website ? Cookies.preferences.website : 'https://marcelomotta.com',
+    privacyPage: 'privacy.html',
+    termsPage: 'terms.html'
+}
+
+//-------------------------------------------------------
 // Consent Setup
 //-------------------------------------------------------
 const consent = {
@@ -35,27 +106,44 @@ const consent = {
     timestamp: timeNow(),
     domain: conf.url,
     cookies : {
-        analytics: {
-            description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-            wanted: null,
-            script: null // script null means the script not will be loaded, and the code will search on DOM by the cookie name
-        },
-        marketing: {
-            src: "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop",
-            description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-            wanted: null,
-            script: true // true means the script will be created in the DOM and loaded on header
-        },
-        giveaway: {
-            src: "https://widget.gleamjs.io/e.js",
-            description: 'These cookies allow us or our third-party giveaway providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-            wanted: null,
-            script: false // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
-        }
+        // analytics: {
+        //     description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
+        //     wanted: null,
+        //     script: null // script null means the script not will be loaded, and the code will search on DOM by the cookie name
+        // },
+        // marketing: {
+        //     src: "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop",
+        //     description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
+        //     wanted: null,
+        //     script: true // true means the script will be created in the DOM and loaded on header
+        // },
+        // giveaway: {
+        //     src: "https://widget.gleamjs.io/e.js",
+        //     description: 'These cookies allow us or our third-party giveaway providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
+        //     wanted: null,
+        //     script: false // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
+        // }
     }
 }
 
-  
+
+//-------------------------------------------------------
+// Cookies Array Storage
+//-------------------------------------------------------
+const arrConsentCookies = Object.keys(consent.cookies)
+const arrayCookies = CookieManage.getCookie('Kess') ? Object.entries(JSON.parse(CookieManage.getCookie('Kess')).cookies) : 'not consented yet'
+const configCookies = Object.entries(Cookies.config)
+const localCookies = JSON.parse(CookieManage.getCookie('Kess'))
+
+const javascriptBlocked = 'javascript/blocked'
+const appJavascript = 'application/javascript'
+const setCookie = 'setCookie'
+const deleteCookie = 'deleteCookie'
+const comma = ',',
+      space = ' '
+
+
+
 //-------------------------------------------------------
 // Create Form elements
 //-------------------------------------------------------
@@ -67,12 +155,64 @@ TitleCase = (str) => {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
       }
     );
-  }
+}
   
-  
+const blockScript = (target, extraTag = false) => {
+    let elemento = document.getElementById(target)
+    if(elemento) {
+        elemento.setAttribute('type', javascriptBlocked)
+        if (extraTag != false) {
+            let extraScript = target + '_script'
+            document.getElementById(extraScript).setAttribute('type', javascriptBlocked)
+        }
+    }
+}
+
+const unblockScript = (target, extraTag = false) => {
+    let elemento = document.getElementById(target)
+    if(elemento) {
+        elemento.setAttribute('type', appJavascript)
+        if (extraTag != false) {
+            let extraScript = target + '_script'
+            document.getElementById(extraScript).setAttribute('type', appJavascript)
+        }
+    }
+}
+
+
 //-------------------------------------------------------
 // Create Elements
 //-------------------------------------------------------
+const generateScript = (key, node = false) => {
+    // debugger
+    let tag = key[0]
+    let cookieInfo = key[1]
+    let wanted = cookieInfo.wanted
+    let script = cookieInfo.script
+    if(wanted) {
+        // todos os wanted devem dar load no script
+        // verifica o script true para gerar no header, false para gerar num target, entao é pedido um novo parametro node* , e null para nao carregar nenhum script, retorna falso
+        if (script === true) {
+            createHeadScript(appJavascript, Cookies.config[tag].src)
+            // console.log(tag + ' this script is true should be loaded on header')
+        } else if (script === false) {
+            // TODO..
+            // precisa passa a target
+            createTargetScript(appJavascript, Cookies.config[tag].src, tag)
+            // console.log(tag + ' this script is false should be not loaded, need a target')
+        } 
+        if (script === null) {
+            // null scripts wanted true = application/javascript
+            // console.log(tag + ' wanted is is ' + cookieInfo.wanted + ' but this one is null, dont have a script')
+            unblockScript(tag, true)
+        }
+    } else if (wanted === false && script === null) {
+        blockScript(tag, true)
+        // console.log('nao quero analytics')
+    }
+}
+
+
 const createElement = (elementName, attribute) => {
     const element = document.createElement(elementName)
     const attrAsArray = Object.entries(attribute)
@@ -92,14 +232,15 @@ createHeadScript = (type, url) => {
     document.head.appendChild(script);
 }
 
-const giveaway = document.querySelector("#giveaway_script");
-createGiveawayScript = (type, url) => {
-    if (document.querySelector("#giveaway_script")){
+createTargetScript = (type, url, target) => {
+    let targetLink = '#' + target + '_script'
+    const div = document.querySelector(targetLink);
+    if (div){
         let script = createElement('script', {
             type: type,
             src: url,
         })
-        giveaway.appendChild(script);
+        div.appendChild(script);
     } else {
         return false
     }
@@ -258,9 +399,9 @@ document.body.after(div_cookie_wrapper)
                         cookie_li_data.appendChild(cookie_li_data_p)
                 //
                 // cria os elementos baseados no consent config object
-                for (let i = 0; i < Object.keys(consent.cookies).length; i++){
-                    let cookie_name = Object.keys(consent.cookies)[i]
-                    let description_cookie = consent.cookies[cookie_name].description
+                for (let i = 0; i < configCookies.length; i++){
+                    let cookie_name = configCookies[i][0]
+                    let description_cookie = configCookies[i][1].description
                     let title = cookie_name == 'giveaway' ? 'Third-Party Cookies' : cookie_name + ' Cookies'
                     let cookie_li = document.createElement('li')
                     cookie_options_tab.appendChild(cookie_li)
@@ -376,11 +517,6 @@ const facebook = document.getElementById('facebook')
 const analytics = document.getElementById('analytics')
 const analytics_script = document.getElementById('analytics_script')
 
-const setCookie = 'setCookie'
-const deleteCookie = 'deleteCookie'
-const comma = ',',
-      space = ' '
-
     
 
 
@@ -455,92 +591,25 @@ for (let i = 0; i < liEl.length; i++) {
 
 
 
-//-------------------------------------------------------
-// Cookie Functional Actions
-//-------------------------------------------------------
-
-function  isEmptyParam(a) {
-    if (a == undefined || a == "") {
-        return true
-    } else {
-        return false
-    }
-}
-
-CookieManage = {
-	getCookie: function (c) {
-        var b = document.cookie;
-        var e = c + "=";
-        var d = b.indexOf("; " + e);
-        if (d == -1) {
-            d = b.indexOf(e);
-            if (d != 0) {
-                return null
-            }
-        } else {
-            d += 2
-        }
-        var a = document.cookie.indexOf(";", d);
-        if (a == -1) {
-            a = b.length
-        }
-        return unescape(b.substring(d + e.length, a))
-    },
-    setCookie: function (b, d, a, c) {
-        var e = new Date();
-        e.setDate(e.getDate() + a);
-        window.document.cookie = b + "=" + escape(d) + ";path=/" + ((isEmptyParam(a)) ? "" : ";expires=" + e.toUTCString()) + ((isEmptyParam(c)) ? ";" : ";")
-    },
-    deleteCookie: function (a) {
-        if (CookieManage.getCookie(a)) {
-            CookieManage.setCookie(a, "", -1, "")
-        }
-    }
-}
-
-
-//-------------------------------------------------------
-// Local Storage Functional Actions
-//-------------------------------------------------------
-
-LocalStrManage = {
-	setLocalStorage:function(a,b) {
-        window.localStorage.setItem(a, b);
-    },
-    getLocalStorage: function (a) {
-        var c = window.localStorage.getItem(a);
-        if ( c != null) {
-            
-            return c;
-        } else {
-            return "";
-        }
-    },
-    deleteLocalStorage: function (a) {
-        window.localStorage.removeItem(a);
-    }
-}
-
-
+// 
 // include dependency https://unpkg.com/yett
 // A small webpage library to control the execution of (third party - analytics for example) scripts
-// 
-createHeadScript('application/javascript', 'https://unpkg.com/yett')
+createHeadScript(appJavascript, 'https://unpkg.com/yett')
+
 
 //-------------------------------------------------------
 // Start Coding here { All basic settings above this line }
 //-------------------------------------------------------
+getAllCookies = () => document.cookie.split(';').reduce((ac, str) => Object.assign(ac, {[str.split('=')[0].trim()]: str.split('=')[1]}), {});
 
-// getAllCookies = () => document.cookie.split(';').reduce((ac, str) => Object.assign(ac, {[str.split('=')[0].trim()]: str.split('=')[1]}), {});
-
-// listCookies = () => {
-//     var theCookies = document.cookie.split(';');
-//     var aString = '';
-//     for (var i = 1 ; i <= theCookies.length; i++) {
-//         aString += i + ' ' + theCookies[i-1] + "\n";
-//     }
-//     return aString;
-// }
+listCookies = () => {
+    var theCookies = document.cookie.split(';');
+    var aString = '';
+    for (var i = 1 ; i <= theCookies.length; i++) {
+        aString += i + ' ' + theCookies[i-1] + "\n";
+    }
+    return aString;
+}
 
 getFormPref = () => {
     return [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
@@ -558,23 +627,28 @@ checkCookieConfig = () => {
     // pelo id ex: document.getElementById('giveaway').checked = true
     // pra diferenciar setar os ids como check_'nome'
     // pegar o consent e gerar o form de opções
+    // debugger
     if (!CookieManage.getCookie(conf.name)){
         // console.log('cookie consent nao existe') entao cria o script por padrao
         // default setup when user not accepted or declined
         consentBarShow()
-        createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
-        createHeadScript('application/javascript', consent.cookies.marketing.src)
+        if (configCookies){
+            for( let i = 0; i < configCookies.length; i++){
+                generateScript(configCookies[i])
+            }
+        }
         // all inputs checked by default when user not consented yet
-        for (let i = 0; i < Object.keys(consent.cookies).length; i++) {
-            let input = document.getElementById('chk_' + Object.keys(consent.cookies)[i])
+        for (let i = 0; i < configCookies.length; i++) {
+            // console.log(configCookies[i][0])
+            let input = document.getElementById('chk_' + configCookies[i][0])
             input.checked = true
         }
 
     } else {
         // consent existe entao verifica a validação do consent 
         floaterVisible()
-        let localCookies = JSON.parse(CookieManage.getCookie('Kess'))
-        for (const [key, value] of Object.entries(localCookies.cookies)) {
+        // seta os inputs baseado nas configurações do cookie salvas
+        for (const [key, value] of arrayCookies) {
             // aqui eu percorro um for pelas configurações setadas da ultima vez
             // console.log(`${key}: ${value}`);
             let wanted = localCookies.cookies[key].wanted
@@ -582,53 +656,21 @@ checkCookieConfig = () => {
             input.checked = wanted == true ? wanted : false
         }
         if (localCookies.value == false){
-            // when user declined for our cookies
-            createGiveawayScript('application/blocked', consent.cookies.giveaway.src)
-            if (analytics) {
-                analytics.setAttribute('type', 'javascript/blocked')
-                analytics_script.setAttribute('type', 'javascript/blocked')
-            }
-            if (facebook) {
-                facebook.setAttribute('type', 'javascript/blocked')
-            }
-            if (tag_manager) {
-                tag_manager.setAttribute('type', 'javascript/blocked')
+            // when user declined for our cookies we need block the null scripts and not load others
+            // cada script false or script null devem ser bloqueados
+            for ( i=0; i< configCookies.length; i++ ) {
+                let cookie = configCookies[i][0]
+                let cookieInfo = configCookies[i][1]
+                if (cookieInfo.script != true){
+                    let tagSetup = cookieInfo.scriptTag === true ? true : false
+                    blockScript(cookie, tagSetup)
+                }
             }
         }else {
-            // consent = true entao deve-se verificar quais as configurações atraves do atributo wanted
-            for (const [cookie, value] of Object.entries(localCookies.cookies)) {
-                // aqui eu percorro um for pelas configurações setadas da ultima vez
-                // console.log(`${cookie}: ${value}`);
-                let c = cookie
-                let cookieAttr = localCookies.cookies[c]
-                // console.log(cookieAttr)
-                if (cookieAttr.wanted === true){
-                    if(c === 'giveaway'){
-                        createGiveawayScript('application/javascript', cookieAttr.src)
-                    } else if (c != 'analytics' ) {
-                        // este script nao pode criar um head pro analytics nem pro tag manager
-                        createHeadScript('application/javascript', cookieAttr.src)
-                    } 
-                } else if (cookieAttr.wanted === false || cookieAttr.wanted === null) {
-                    // se o wanted estiver setado pra false ou null
-                    if (c === 'analytics') {
-                        document.getElementById('analytics').setAttribute('type', 'javascript/blocked')
-                    }
-                    if (c === 'facebook') {
-                        document.getElementById('facebook').setAttribute('type', 'javascript/blocked')
-                    }
-                    if (c === 'tag_manager') {
-                        document.getElementById('tag_manager').setAttribute('type', 'javascript/blocked')
-                    }
-                }
-
-                // let wanted = localCookies.cookies[key].wanted
-                // let input = document.getElementById('chk_' + key)
-                // input.checked = wanted == true ? wanted : false
+            // consent = true , consent já configurado entao deve-se verificar quais as configurações atraves do atributo wanted
+            for ( i=0 ; i < arrayCookies.length ; i++){
+                generateScript(arrayCookies[i])
             }
-            // createGiveawayScript('application/javascript', consent.cookies.giveaway.src)
-            // createHeadScript('application/javascript', consent.cookies.marketing.src)
-
         }
     }
     // return cookie
@@ -649,135 +691,59 @@ setCookieConsent = (key) => {
 // Starting App
 //-------------------------------------------------------
 checkCookieConfig()
-//-------------------------------------------------------
-// Basic Log
-//-------------------------------------------------------
-// verifyLog = () => {
-//     let dataLog = LocalStrManage.getLocalStorage('Current_Log')
-//     console.log(dataLog)
-//     let date = new Date()
-
-//     console.log(date)
-//     if (dataLog < timeNow()){
-//         console.log('ae : ' + dataLog + ' e time = ' + timeNow())
-//     }
-
-// }
-// verifyLog()
-// LocalStrManage.setLocalStorage('Current_Log', timeNow())
-
 
 
 //-------------------------------------------------------
 // Cookie Preparation
 //-------------------------------------------------------
 
-
 prepareCookies = (preferences, action = 'setCookie', form = false) => {
     // prepareCookies tem por padrao a ação de inserir 'setCookie'
-    // console.log(preferences)
-    let allPrefs = getAllPref()
-    // if (preferences.length === 0) {
-    //     for (let i = 0; i < allPrefs.length; i++){
-    //         try {
-    //             let cookiePref = allPrefs[i]
-    //             consent.cookies[cookiePref].wanted = false
-    //             setCookieConsent(JSON.stringify(consent))
-    //         } catch(err) {
-    //             console.log(err)
-    //         }
-    //     }
-    // }
+    setAllConsent = (value) => {
+        for (i=0; i < configCookies.length; i++){
+            let n = configCookies[i][0]
+            let content = configCookies[i][1]
+            consent.cookies[n] = {}
+            consent.cookies[n].wanted = value
+            consent.cookies[n].script = content.script
+        }
+    }
     // 
-    if (preferences === 'all') {
-        // debugger
-        for (let i = 0; i < allPrefs.length; i++){
-            try {
-                let cookiePref = allPrefs[i]
-                consent.cookies[cookiePref].wanted = true
-                consent.value = true
-                setCookieConsent(JSON.stringify(consent))
-            } catch(err) {
-                console.log(err)
-            }
+    setConsentByForm = (preferences) => {
+        // reset all preferences to false
+        setAllConsent(false)
+        // set all preferences selected by user
+        for (i=0; i < preferences.length; i++){
+            let n = preferences[i]
+            consent.cookies[n].wanted = true
         }
-        setTimeout(() => {
-            // console.log("Refreshing page in 1 second.");
-            window.location.reload()
-          }, "1000")
-        //   
     }
-    if (preferences.length < 1) {
-        // debugger
-        for (let i = 0; i < allPrefs.length; i++){
-            try {
-                // let configName = conf.name + space + allPrefs[i]
-                // var output= CookieManage.deleteCookie(configName);
-                let cookiePref = allPrefs[i]
-                consent.cookies[cookiePref].wanted = false
-                consent.value = false
+    
+    if (action === 'setCookie') {
+        if(form === true) {
+            for (let i = 0; i < preferences.length; i++){
+                setConsentByForm(preferences)
                 setCookieConsent(JSON.stringify(consent))
-            } catch(err) {
-                console.log(err)
             }
-        }
-        setTimeout(() => {
-            // console.log("Refreshing page in 1 second.");
-            window.location.reload()
-          }, "1000")
-        //   
-    } else if(form === true) {
-        for (let i = 0; i < preferences.length; i++){
-            let formPref = consent.cookies[preferences[i]]
-            formPref.wanted = true
+            setTimeout(() => {
+                // console.log("Refreshing page in 1 second.");
+                window.location.reload()
+              }, "1000") 
+        } else if (preferences.length === configCookies.length) {
+            setAllConsent(true)
             setCookieConsent(JSON.stringify(consent))
+            setTimeout(() => {
+                window.location.reload()
+            }, "1000") 
         }
+    } else if (action === 'deleteCookie') {
+        setAllConsent(false)
+        consent.value = false
+        setCookieConsent(JSON.stringify(consent))
         setTimeout(() => {
-            // console.log("Refreshing page in 1 second.");
             window.location.reload()
-          }, "1000")
-    } else {
-        //
-        for (let i = 0; i < preferences.length; i++){
-            try {
-                // let script= await getCookieScript(preferences[i])
-                let configName = conf.name + space + preferences[i]
-                let expires = 15
-                
-                    if (action === 'setCookie') {
-                        // var output= CookieManage.setCookie(configName, script, expires);
-                        let formPref = consent.cookies[preferences[i]]
-                        // TODO..
-                        // console.log([i])
-                        // console.log(formPref.src)
-                        // debugger
-                        // console.log(formPref.wanted)
-                        formPref.wanted = true
-                        // console.log(formPref.wanted)
-                        // debugger
-                        setCookieConsent(JSON.stringify(consent))
-
-                        // JSON.parse(CookieManage.getCookie('Kess'))
-                        // setCookieConsent(false)
-                        // cria elementos relacionados a escolha do usuario
-                        // const givescript = document.createElement('div')
-                        // givescript.innerHTML = script;
-                        // document.getElementById("giveaway-script").appendChild(givescript);
-                    }
-                    else if (action === 'deleteCookie') {
-                        consent.cookies[preferences[i]].wanted = false
-                        consent.value = false
-                        setCookieConsent(JSON.stringify(consent))
-                        // var output= CookieManage.deleteCookie(configName);
-                    }
-                    
-            } catch(err) {
-                console.log(err)
-            }
-        }
+        }, "1000") 
     }
-    window.location.reload()
-
 }
 
 
@@ -792,36 +758,25 @@ cookieSettings.addEventListener("click", () => {
 })
 
 confirmCookies.addEventListener("click", ()=> {
-    // pega as preferencias do formulario escolhidas pelo usuario
     const pref = getFormPref();
     prepareCookies(pref, setCookie, true)
-    // cookiePreferences = pref.toString().split(/\s*;\s*/)
     floaterVisible()
-    window.location.reload()
+    // window.location.reload()
 });
 
 consentGive.addEventListener("click", () => {
-    // allowAll()
-    prepareCookies('all', setCookie)
+    prepareCookies(allPrefs, setCookie)
     consentBarHide()
     floaterVisible()
-    // window.location.reload()
-
 })
 
 allowCookies.addEventListener("click", ()=> {
-    // allowAll()
-    prepareCookies('all', setCookie)
+    prepareCookies(allPrefs, setCookie)
     floaterVisible()
-    // window.location.reload()
 
 });
-
 
 declineCookies.addEventListener("click", ()=> {
     prepareCookies(allPrefs, deleteCookie)
     floaterVisible()
-    // giveaway.querySelector('script').setAttribute('type', 'javascript/blocked')
-    // window.location.reload()
 });
-

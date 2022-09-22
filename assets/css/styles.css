@@ -417,3 +417,7 @@ body {
   color: #fff;
   background: none;
 }
+
+.st-cmp-settings{
+  display: none!important;
+}
