@@ -138,13 +138,13 @@ const arrayCookies = CookieManage.getCookie('Kess') ? Object.entries(JSON.parse(
 const configCookies = Object.entries(Cookies.config)
 const localCookies = JSON.parse(CookieManage.getCookie('Kess'))
 
+const w3orgSvg = 'http://www.w3.org/2000/svg'
 const javascriptBlocked = 'javascript/blocked'
 const appJavascript = 'application/javascript'
 const setCookie = 'setCookie'
 const deleteCookie = 'deleteCookie'
-const comma = ',',
-      space = ' '
-
+const comma = ','
+const space = ' '
 
 
 //-------------------------------------------------------
@@ -158,7 +158,7 @@ TitleCase = (str) => {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
       }
     );
-}
+} 
   
 const blockScript = (target, extraTag = false) => {
     let elemento = document.getElementById(target)
@@ -197,21 +197,16 @@ const generateScript = (key, node = false) => {
         // verifica o script true para gerar no header, false para gerar num target, entao é pedido um novo parametro node* , e null para nao carregar nenhum script, retorna falso
         if (script === true) {
             createHeadScript(appJavascript, Cookies.config[tag].src)
-            // console.log(tag + ' this script is true should be loaded on header')
         } else if (script === false) {
-            // TODO..
-            // precisa passa a target
+            // precisa passar um target
             createTargetScript(appJavascript, Cookies.config[tag].src, tag)
-            // console.log(tag + ' this script is false should be not loaded, need a target')
         } 
         if (script === null) {
             // null scripts wanted true = application/javascript
-            // console.log(tag + ' wanted is is ' + cookieInfo.wanted + ' but this one is null, dont have a script')
             unblockScript(tag, true)
         }
     } else if (wanted === false && script === null) {
         blockScript(tag, true)
-        // console.log('nao quero analytics')
     }
 }
 
@@ -250,12 +245,12 @@ createTargetScript = (type, url, target) => {
 }
 
 const renderIconBack = (node) => {
-    const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const iconSvg = document.createElementNS(w3orgSvg, 'svg');
     iconSvg.setAttribute('viewBox', '0 0 448 512');
-    iconSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    iconSvg.setAttribute('xmlns', w3orgSvg);
 
     const iconPath = document.createElementNS(
-        'http://www.w3.org/2000/svg',
+        w3orgSvg,
         'path'
       );
     iconPath.setAttribute(
@@ -268,8 +263,8 @@ const renderIconBack = (node) => {
 }
 
 const renderIconClose = (node) => {
-    const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    iconSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const iconSvg = document.createElementNS(w3orgSvg, 'svg');
+    iconSvg.setAttribute('xmlns', w3orgSvg);
     iconSvg.setAttribute('width', '24');
     iconSvg.setAttribute('heigth', '24');
     iconSvg.setAttribute('fill', 'none');
@@ -277,16 +272,16 @@ const renderIconClose = (node) => {
     iconSvg.setAttribute('stroke', '#273240');
     iconSvg.classList.add('post-icon');
 
-    const iconG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const iconG = document.createElementNS(w3orgSvg, 'g');
     iconG.setAttribute('opacity', '0.5')
     iconSvg.appendChild(iconG);
     
     const iconPath = document.createElementNS(
-      'http://www.w3.org/2000/svg',
+      w3orgSvg,
       'path'
     );
     const iconPath2 = document.createElementNS(
-      'http://www.w3.org/2000/svg',
+      w3orgSvg,
       'path'
     );
   
