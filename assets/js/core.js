@@ -88,40 +88,43 @@ const dateNow = () => {
 //-------------------------------------------------------
 // Basic Cookies Script Setup
 //-------------------------------------------------------
-const conf = {
+const Config = {
     name : Cookies.preferences.name ? Cookies.preferences.name : 'Cookie Consent',
     description: Cookies.preferences.description ? Cookies.preferences.description : 'Cookie notice bars are not enough!',
     url: Cookies.preferences.website ? Cookies.preferences.website : 'https://marcelomotta.com',
-    privacyPage: 'privacy.html',
-    termsPage: 'terms.html'
+    privacyPage: Cookies.preferences.privacyPage ? Cookies.preferences.privacyPage : 'privacy.html',
+    termsPage: Cookies.preferences.termsPage ? Cookies.preferences.termsPage : 'terms.html'
 }
 
 //-------------------------------------------------------
 // Consent Setup
 //-------------------------------------------------------
 const consent = {
-    name: conf.name,
+    name: Config.name,
     value: true,
     date: dateNow(),
     timestamp: timeNow(),
-    domain: conf.url,
+    domain: Config.url,
     cookies : {
         // analytics: {
         //     description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
         //     wanted: null,
-        //     script: null // script null means the script not will be loaded, and the code will search on DOM by the cookie name
+        //     script: null 
+        //     // script null means the script not will be loaded, and the code will search on DOM by the cookie name
         // },
         // marketing: {
-        //     src: "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop",
+        //     src: "https://example.com/js/example.js",
         //     description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
         //     wanted: null,
-        //     script: true // true means the script will be created in the DOM and loaded on header
+        //     script: true 
+        //     // true means the script will be created in the DOM and loaded on header
         // },
-        // giveaway: {
-        //     src: "https://widget.gleamjs.io/e.js",
+        // performance: {
+        //     src: "https://example.com/js/ex.js",
         //     description: 'These cookies allow us or our third-party giveaway providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
         //     wanted: null,
-        //     script: false // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
+        //     script: false 
+        //     // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
         // }
     }
 }
@@ -312,6 +315,14 @@ const renderIconClose = (node) => {
 //-------------------------------------------------------
 // Generating DOM Elements
 //-------------------------------------------------------
+
+validateCookie = () => {
+    if(arrayCookies.length != configCookies.length){
+        console.log('Cookie out of date')
+        CookieManage.deleteCookie(Cookies.preferences.name)
+    }
+}
+
 createCookieSettingsElements = () => {
     
 let div_cookie_wrapper = createElement('div', { class: 'cookie_wrapper' })
@@ -488,7 +499,6 @@ document.body.after(div_cookie_wrapper)
                     cc_button.appendChild(buttonConsent)
 }
 
-
 createCookieSettingsElements()
 
 
@@ -512,12 +522,6 @@ const cookieSettings = document.querySelector(".ccb__edit")
 const consentGive = document.querySelector(".consent__give")
 const cookieConsentBar = document.querySelector("#cconsent-bar")
 
-const tag_manager = document.getElementById('tag_manager')
-const facebook = document.getElementById('facebook')
-const analytics = document.getElementById('analytics')
-const analytics_script = document.getElementById('analytics_script')
-
-    
 
 
 //-------------------------------------------------------
@@ -525,7 +529,7 @@ const analytics_script = document.getElementById('analytics_script')
 //-------------------------------------------------------
 
 close.addEventListener("click", function () {
-    if (!CookieManage.getCookie(conf.name)){
+    if (!CookieManage.getCookie(Config.name)){
         consentBarShow()
         cookieWrapper.style.display = "none";
     }else {
@@ -627,8 +631,7 @@ checkCookieConfig = () => {
     // pelo id ex: document.getElementById('giveaway').checked = true
     // pra diferenciar setar os ids como check_'nome'
     // pegar o consent e gerar o form de opções
-    // debugger
-    if (!CookieManage.getCookie(conf.name)){
+    if (!CookieManage.getCookie(Config.name)){
         // console.log('cookie consent nao existe') entao cria o script por padrao
         // default setup when user not accepted or declined
         consentBarShow()
@@ -639,7 +642,6 @@ checkCookieConfig = () => {
         }
         // all inputs checked by default when user not consented yet
         for (let i = 0; i < configCookies.length; i++) {
-            // console.log(configCookies[i][0])
             let input = document.getElementById('chk_' + configCookies[i][0])
             input.checked = true
         }
@@ -658,6 +660,9 @@ checkCookieConfig = () => {
         if (localCookies.value == false){
             // when user declined for our cookies we need block the null scripts and not load others
             // cada script false or script null devem ser bloqueados
+            floaterHide()
+            cookieWrapper.style.display = "none";
+            consentBarShow()
             for ( i=0; i< configCookies.length; i++ ) {
                 let cookie = configCookies[i][0]
                 let cookieInfo = configCookies[i][1]
@@ -678,9 +683,9 @@ checkCookieConfig = () => {
 
 setCookieConsent = (key) => {
     if (key == false) {
-        let cookieConsent= CookieManage.deleteCookie(conf.name)
+        let cookieConsent= CookieManage.deleteCookie(Config.name)
     } else {
-        let cookieConsent= CookieManage.setCookie(conf.name, key, 15);
+        let cookieConsent= CookieManage.setCookie(Config.name, key, 15);
     }
 }
 
@@ -690,8 +695,8 @@ setCookieConsent = (key) => {
 //-------------------------------------------------------
 // Starting App
 //-------------------------------------------------------
+validateCookie()
 checkCookieConfig()
-
 
 //-------------------------------------------------------
 // Cookie Preparation
@@ -718,8 +723,16 @@ prepareCookies = (preferences, action = 'setCookie', form = false) => {
             consent.cookies[n].wanted = true
         }
     }
-    
     if (action === 'setCookie') {
+        if (preferences.length === 0){
+            setAllConsent(false)
+            consent.value = false
+            setCookieConsent(JSON.stringify(consent))
+            setTimeout(() => {
+                window.location.reload()
+            }, "1000") 
+            return false
+        }
         if(form === true) {
             for (let i = 0; i < preferences.length; i++){
                 setConsentByForm(preferences)

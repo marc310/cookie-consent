@@ -2,6 +2,14 @@
  
 set preferences creating an javascript object on script tag before the core script
 
+In this Object take attention at the script specification
+
+> script null : means the script not will be loaded, and the code will search on DOM by the cookie name
+    
+> script true : means the script will be created in the DOM and loaded on header
+    
+> script false : that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
+
 
 
 > 
@@ -33,14 +41,6 @@ set preferences creating an javascript object on script tag before the core scri
         }
     }
 
-in this Object take attention at the script specification
-
-> script null : means the script not will be loaded, and the code will search on DOM by the cookie name
-    
-> script true : means the script will be created in the DOM and loaded on header
-    
-> script false : that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
-
 this setting change everything in how the script will be loaded
 
 # Configure your Tags
@@ -61,3 +61,30 @@ if using any script should have any extra tag like analytics configure giving a 
 if you using any script should be inserted on body page you will need configure him giving a id for any div to give a target for the script know where should insert the script code
 > 
     <div id="giveaway_script"></div>
+
+# Cookie Saved JSON on Local Machine 
+: this is an example of the JSON Cookie infos saved on local machine used by script to configure the page exibition
+
+> 
+    {
+        name: 'Kess', 
+        domain: 'https://kessgame.com/'
+        date: '2022/9/22', 
+        timestamp: 1663883349107, 
+        value: true, 
+        cookies: {
+            analytics: {
+                script: null
+                wanted: true
+                }
+            giveaway: {
+                script: false
+                wanted: true
+                }
+            marketing: {
+                script: true
+                wanted: true
+                }
+        }
+    }
+    
