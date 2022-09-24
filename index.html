@@ -1,9 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- 1) Add a blacklist -->
+    <script>
+      window.YETT_BLACKLIST = [
+        /my-blacklisted-domain/,
+      ]
+      // Or a whitelist
+      window.YETT_WHITELIST = [
+        /my-whitelisted-domain/,
+      ]
+    </script>
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script id="analytics" async src="https://www.googletagmanager.com/gtag/js?id=UA-145014090-1"></script>
-    <script id="analytics_script">
+    <script id="analytics" type="text/plain" crossorigin="anonymous" async src="https://www.googletagmanager.com/gtag/js?id=UA-145014090-1"></script>
+    <script id="analytics_script" type="text/plain">
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
@@ -39,9 +49,44 @@
     
     <!-- inner body -->
 
-    
+    <!-- Default Statcounter code for Cookies Consent
+    http://marcelomotta.com/dev/kess/cookies -->
+    <!-- <script id="statcounter" type="javascript/blocked">
+        var sc_project=12799177; 
+        var sc_invisible=0; 
+        var sc_security="cef97f6c"; 
+        var sc_text=3; 
+        var scJsHost = "https://";
+        document.write("<sc"+"ript type='text/javascript' src='" +
+        scJsHost+
+        "statcounter.com/counter/counter.js'></"+"script>");
+        debugger
+    </script> -->
+        <noscript><div class="statcounter"><a title="Web Analytics"
+        href="https://statcounter.com/" target="_blank"><img
+        class="statcounter"
+        src="https://c.statcounter.com/12799177/0/cef97f6c/0/"
+        alt="Web Analytics"
+        referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+        <!-- End of Statcounter Code -->
+        <a href="https://statcounter.com/p12799177/?guest=1">View My
+        Stats</a>
+
+        
 </body>
 </html>
+
+<script>
+    var sc_project=12799177; 
+    var sc_invisible=0; 
+    var sc_security="cef97f6c"; 
+    var sc_text=3; 
+    
+ window.addEventListener('DOMContentLoaded', function() {
+  console.log('window - DOMContentLoaded - bubble'); // 3rd
+  checkCookieConfig()
+});
+</script>
 
 <script>
     const Cookies = {
@@ -54,6 +99,11 @@
                 description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
                 script: null, // script null means the script not will be loaded, and the code will search on DOM by the cookie name
                 scriptTag: true,
+            },
+            statcounter: {
+                src: 'https://statcounter.com/counter/counter.js',
+                description: 'tracking cookies test with statcounter',
+                script: true,
             },
             marketing: {
                 src: "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop",

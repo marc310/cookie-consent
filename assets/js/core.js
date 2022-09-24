@@ -7,10 +7,19 @@
 :: Version: 1.0.0
 :: Created: 22 Set 2022
 ************************************************************ */
-
+Default = {
+    name: 'Cookie Consent',
+    url: 'https://marcelomotta.com',
+    description: 'Cookie notice bars are not enough!',
+    terms: 'terms.html',
+    privacy: 'privacy.html',
+    expire: 15
+} 
 //-------------------------------------------------------
 // Cookie Functional Actions
 //-------------------------------------------------------
+var cookies = document.cookie.split(';')
+
 isEmptyParam = (a) => {
     if (a == undefined || a == "") {
         return true
@@ -89,22 +98,20 @@ const dateNow = () => {
 // Basic Cookies Script Setup
 //-------------------------------------------------------
 const Config = {
-    name : Cookies.preferences.name ? Cookies.preferences.name : 'Cookie Consent',
-    description: Cookies.preferences.description ? Cookies.preferences.description : 'Cookie notice bars are not enough!',
-    url: Cookies.preferences.website ? Cookies.preferences.website : 'https://marcelomotta.com',
-    privacyPage: Cookies.preferences.privacyPage ? Cookies.preferences.privacyPage : 'privacy.html',
-    termsPage: Cookies.preferences.termsPage ? Cookies.preferences.termsPage : 'terms.html'
+    name : Cookies.preferences.name ? Cookies.preferences.name : Default.name,
+    description: Cookies.preferences.description ? Cookies.preferences.description : Default.description,
+    url: Cookies.preferences.website ? Cookies.preferences.website : Default.url,
+    privacyPage: Cookies.preferences.privacyPage ? Cookies.preferences.privacyPage : Default.privacy,
+    termsPage: Cookies.preferences.termsPage ? Cookies.preferences.termsPage : Default.terms,
+    expire: Cookies.preferences.expire ? Cookies.preferences.expire : Default.expire
 }
 
 //-------------------------------------------------------
 // Consent Setup
 //-------------------------------------------------------
 const consent = {
-    name: Config.name,
     value: true,
-    date: dateNow(),
     timestamp: timeNow(),
-    domain: Config.url,
     cookies : {
         // analytics: {
         //     description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
@@ -164,7 +171,7 @@ const blockScript = (target, extraTag = false) => {
     let elemento = document.getElementById(target)
     if(elemento) {
         elemento.setAttribute('type', javascriptBlocked)
-        if (extraTag != false) {
+        if (extraTag === true) {
             let extraScript = target + '_script'
             document.getElementById(extraScript).setAttribute('type', javascriptBlocked)
         }
@@ -175,7 +182,7 @@ const unblockScript = (target, extraTag = false) => {
     let elemento = document.getElementById(target)
     if(elemento) {
         elemento.setAttribute('type', appJavascript)
-        if (extraTag != false) {
+        if (extraTag === true) {
             let extraScript = target + '_script'
             document.getElementById(extraScript).setAttribute('type', appJavascript)
         }
@@ -186,7 +193,7 @@ const unblockScript = (target, extraTag = false) => {
 //-------------------------------------------------------
 // Create Elements
 //-------------------------------------------------------
-const generateScript = (key, node = false) => {
+const generateScript = (key) => {
     // debugger
     let tag = key[0]
     let cookieInfo = key[1]
@@ -206,11 +213,12 @@ const generateScript = (key, node = false) => {
             unblockScript(tag, true)
         }
     } else if (wanted === false && script === null) {
-        blockScript(tag, true)
+        let extraTag = Cookies.config[tag].scriptTag === true ? true : false
+        blockScript(tag, extraTag)
     }
 }
 
-
+//
 const createElement = (elementName, attribute) => {
     const element = document.createElement(elementName)
     const attrAsArray = Object.entries(attribute)
@@ -313,7 +321,6 @@ const renderIconClose = (node) => {
 
 validateCookie = () => {
     if(arrayCookies.length != configCookies.length){
-        console.log('Cookie out of date')
         CookieManage.deleteCookie(Cookies.preferences.name)
     }
 }
@@ -590,33 +597,6 @@ for (let i = 0; i < liEl.length; i++) {
 
 
 
-// 
-// include dependency https://unpkg.com/yett
-// A small webpage library to control the execution of (third party - analytics for example) scripts
-createHeadScript(appJavascript, 'https://unpkg.com/yett')
-
-
-//-------------------------------------------------------
-// Start Coding here { All basic settings above this line }
-//-------------------------------------------------------
-getAllCookies = () => document.cookie.split(';').reduce((ac, str) => Object.assign(ac, {[str.split('=')[0].trim()]: str.split('=')[1]}), {});
-
-listCookies = () => {
-    var theCookies = document.cookie.split(';');
-    var aString = '';
-    for (var i = 1 ; i <= theCookies.length; i++) {
-        aString += i + ' ' + theCookies[i-1] + "\n";
-    }
-    return aString;
-}
-
-getFormPref = () => {
-    return [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
-}
-getAllPref = () => {
-    return [...document.querySelectorAll('[data-function]')].filter((el) => el).map((el) => el.getAttribute('data-function'));
-}
-
 
 // verifica o local storage e assinala as atribuiçoes de configurações
 checkCookieConfig = () => {
@@ -676,14 +656,6 @@ checkCookieConfig = () => {
     // return cookie
 }
 
-setCookieConsent = (key) => {
-    if (key == false) {
-        let cookieConsent= CookieManage.deleteCookie(Config.name)
-    } else {
-        let cookieConsent= CookieManage.setCookie(Config.name, key, 15);
-    }
-}
-
 // se nao houver configurações entao é o primeiro acesso
 // cria um cookie local e salva as configurações default
 // se o usuario assinala grava as novas configs
@@ -692,6 +664,42 @@ setCookieConsent = (key) => {
 //-------------------------------------------------------
 validateCookie()
 checkCookieConfig()
+
+// 
+// include dependency https://unpkg.com/yett
+// A small webpage library to control the execution of (third party - analytics for example) scripts
+createHeadScript(appJavascript, 'https://unpkg.com/yett')
+//
+
+//-------------------------------------------------------
+//-------------------------------------------------------
+//-------------------------------------------------------
+setCookieConsent = (key) => {
+    if (key == false) {
+        CookieManage.deleteCookie(Config.name)
+    } else {
+        CookieManage.setCookie(Config.name, key, Config.expire);
+    }
+}
+
+
+getAllCookies = () => document.cookie.split(';').reduce((ac, str) => Object.assign(ac, {[str.split('=')[0].trim()]: str.split('=')[1]}), {});
+
+listCookies = () => {
+    var theCookies = document.cookie.split(';');
+    var aString = '';
+    for (var i = 1 ; i <= theCookies.length; i++) {
+        aString += i + ' ' + theCookies[i-1] + "\n";
+    }
+    return aString;
+}
+
+getFormPref = () => {
+    return [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
+}
+getAllPref = () => {
+    return [...document.querySelectorAll('[data-function]')].filter((el) => el).map((el) => el.getAttribute('data-function'));
+}
 
 //-------------------------------------------------------
 // Cookie Preparation
@@ -734,7 +742,6 @@ prepareCookies = (preferences, action = 'setCookie', form = false) => {
                 setCookieConsent(JSON.stringify(consent))
             }
             setTimeout(() => {
-                // console.log("Refreshing page in 1 second.");
                 window.location.reload()
               }, "1000") 
         } else if (preferences.length === configCookies.length) {
@@ -769,7 +776,6 @@ confirmCookies.addEventListener("click", ()=> {
     const pref = getFormPref();
     prepareCookies(pref, setCookie, true)
     floaterVisible()
-    // window.location.reload()
 });
 
 consentGive.addEventListener("click", () => {
