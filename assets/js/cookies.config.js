@@ -2,18 +2,6 @@
 
 const Config = {
 
-   
-    Default : {
-        name: 'Cookie Consent',
-        url: 'https://marcelomotta.com',
-        description: 'Cookie notice bars are not enough!',
-        terms: 'terms.html',
-        privacy: 'privacy.html',
-        expire: 15
-    },
-
-
-
     Cookies : {
         
         template: {
@@ -23,6 +11,7 @@ const Config = {
                 AnalyticsCode: 'UA-145014090-1',
                 description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
                 script: null, // script null means the script not will be loaded, and the code will search on DOM by the cookie name
+                // wanted: true
                 // scriptTag: true,
             },
             statcounter: {
@@ -51,35 +40,11 @@ const Config = {
         preferences: {
             name: 'Kess',
             website: 'https://kessgame.com/',
-            expire: 15
-
+            expire: 15,
+            description: 'Cookie notice bars are not enough!',
+            terms: 'terms.html',
+            privacy: 'privacy.html',
         },
     },
-
-
-    //-------------------------------------------------------
-    // Basic Cookies Script Setup
-    //-------------------------------------------------------
-    settings : {
-        // name : Cookies.preferences.name ? Cookies.preferences.name : Default.name,
-        // description: Cookies.preferences.description ? Cookies.preferences.description : Default.description,
-        // url: Cookies.preferences.website ? Cookies.preferences.website : Default.url,
-        // privacyPage: Cookies.preferences.privacyPage ? Cookies.preferences.privacyPage : Default.privacy,
-        // termsPage: Cookies.preferences.termsPage ? Cookies.preferences.termsPage : Default.terms,
-        // expire: Cookies.preferences.expire ? Cookies.preferences.expire : Default.expire,
-        // version: '1.0.0'
-    },
-
-    //-------------------------------------------------------
-    // Consent Setup
-    //-------------------------------------------------------
-    consent : {
-        value: true,
-        timestamp: new Date().getTime(),
-        cookies : {
-        }
-    }
-
-    
 
 }

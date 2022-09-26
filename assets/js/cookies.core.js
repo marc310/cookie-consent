@@ -8,6 +8,48 @@
 :: Created: 22 Set 2022
 ************************************************************ */
 
+if (!Config) {
+    console.log('The Config file are not properly configured, please set up the config file before continue.')
+}
+//-------------------------------------------------------
+// Basic Cookies Script Setup
+//-------------------------------------------------------
+Config.Default = {
+    name: 'Cookie Consent',
+    url: 'https://github.com/marc310/cookie-consent',
+    description: 'Cookie notice bars are not enough!',
+    terms: 'terms.html',
+    privacy: 'privacy.html',
+    expire: 15,
+    consent: false
+},
+
+//-------------------------------------------------------
+//-------------------------------------------------------
+
+Config.settings = {
+    name : Config.Cookies.preferences.name ? Config.Cookies.preferences.name : Config.Default.name,
+    description: Config.Cookies.preferences.description ? Config.Cookies.preferences.description : Config.Default.description,
+    url: Config.Cookies.preferences.website ? Config.Cookies.preferences.website : Config.Default.url,
+    privacyPage: Config.Cookies.preferences.privacyPage ? Config.Cookies.preferences.privacyPage : Config.Default.privacy,
+    termsPage: Config.Cookies.preferences.termsPage ? Config.Cookies.preferences.termsPage : Config.Default.terms,
+    expire: Config.Cookies.preferences.expire ? Config.Cookies.preferences.expire : Config.Default.expire,
+    defaultConsent: Config.Cookies.preferences.consent ? Config.Cookies.preferences.consent : Config.Default.consent,
+    version: 1
+},
+
+//-------------------------------------------------------
+// Consent Setup
+//-------------------------------------------------------
+Config.consent = {
+    value: true,
+    timestamp: new Date().getTime(),
+    cookies : {
+    }
+}
+
+
+
 const w3orgSvg = 'http://www.w3.org/2000/svg'
 const javascriptBlocked = 'text/plain'
 const appJavascript = 'application/javascript'
@@ -51,10 +93,11 @@ create = {
                 // null scripts wanted true = application/javascript
                 let ConfigPath = Config.Cookies.template[tag]
                 if(ConfigPath.AnalyticsCode){
-                    console.log('cria analytics')
+                    // console.log('cria analytics')
                     create.Analytics(ConfigPath.AnalyticsCode)
                 } else if (ConfigPath.FacebookCode) {
-                    console.log('cria facebook script')
+                    // console.log('cria facebook script')
+                    create.Facebook(ConfigPath.FacebookCode)
                 }
                 else {
                     unblockScript(tag, true)
@@ -135,45 +178,6 @@ create = {
 }
 
 
-// disableTracking = () => {
-//     // Google Analytics Tracking ('client_storage': 'none')
-//     if (this.tracking.AnalyticsCode) {
-//       let Analytics = document.createElement('script');
-//       Analytics.setAttribute('src', `https://www.googletagmanager.com/gtag/js?id=${this.tracking.AnalyticsCode}`);
-//       document.head.appendChild(Analytics);
-//       let AnalyticsData = document.createElement('script');
-//       AnalyticsData.text = `window.dataLayer = window.dataLayer || [];
-//                         function gtag(){dataLayer.push(arguments);}
-//                         gtag('js', new Date());
-//                         gtag('config', '${this.tracking.AnalyticsCode}' , {
-//                             'client_storage': 'none',
-//                             'anonymize_ip': true
-//                         });`;
-//       document.head.appendChild(AnalyticsData);
-//     }
-
-//     // Clear cookies - not working 100%
-//     this.clearCookies()
-//   }
-
-  clearCookies = () => {
-    let cookies = document.cookie.split("; ");
-    CookieManage.deleteCookie('_gid')
-    CookieManage.deleteCookie('_ga')
-    // for (let c = 0; c < cookies.length; c++) {
-    //   let d = window.location.hostname.split(".");
-    //   while (d.length > 0) {
-    //     let cookieBase = encodeURIComponent(cookies[c].split(";")[0].split("=")[0]) + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; domain=' + d.join('.') + ' ;path=';
-    //     let p = location.pathname.split('/');
-    //     document.cookie = cookieBase + '/';
-    //     while (p.length > 0) {
-    //       document.cookie = cookieBase + p.join('/');
-    //       p.pop();
-    //     };
-    //     d.shift();
-    //   }
-    // }
-  }
 //
 //-------------------------------------------------------
 // Get Core Config
@@ -197,8 +201,12 @@ isEmptyParam = (a) => {
     }
 }
 
-CookieManage = {
-	getCookie: function (c) {
+
+//-------------------------------------------------------
+// Local Storage Functional Actions
+//-------------------------------------------------------
+manage = {
+    getCookie: function (c) {
         var b = document.cookie;
         var e = c + "=";
         var d = b.indexOf("; " + e);
@@ -222,17 +230,10 @@ CookieManage = {
         window.document.cookie = b + "=" + escape(d) + ";path=/" + ((isEmptyParam(a)) ? "" : ";expires=" + e.toUTCString()) + ((isEmptyParam(c)) ? ";" : ";")
     },
     deleteCookie: function (a) {
-        if (CookieManage.getCookie(a)) {
-            CookieManage.setCookie(a, "", -1, "")
+        if (manage.getCookie(a)) {
+            manage.setCookie(a, "", -1, "")
         }
-    }
-}
-
-
-//-------------------------------------------------------
-// Local Storage Functional Actions
-//-------------------------------------------------------
-LocalStrManage = {
+    },
 	setLocalStorage:function(a,b) {
         window.localStorage.setItem(a, b);
     },
@@ -258,10 +259,51 @@ LocalStrManage = {
 // Cookies Array Storage
 //-------------------------------------------------------
 const arrConsentCookies = Object.keys(Config.consent.cookies)
-const arrayCookies = CookieManage.getCookie(Config.Cookies.preferences.name) ? Object.entries(JSON.parse(CookieManage.getCookie('Kess')).cookies) : 'not consented yet'
+const arrayCookies = manage.getCookie(Config.Cookies.preferences.name) ? Object.entries(JSON.parse(manage.getCookie(Config.settings.name)).cookies) : 'not consented yet'
 const configCookies = Object.entries(Config.Cookies.template)
-const localCookies = JSON.parse(CookieManage.getCookie('Kess'))
+const localCookies = JSON.parse(manage.getCookie(Config.settings.name))
+const defaultConsentName = Config.settings.name + '_consent'
 
+
+
+bannedList = [
+    '_gid',
+    '_ga',
+    'euconsent-v2',
+    'pubconsent-v2'
+]
+
+Consent = {
+    checkBannedList: ()=>{
+        for(let i = 0; i < bannedList.length; i++) {
+            let target = bannedList[i]
+            let cookie = manage.getCookie(target)
+            if(cookie) {
+                manage.deleteCookie(target)
+            }
+        }
+    },
+
+    clearCookies: () => {
+      manage.deleteCookie(Config.settings.name)
+      Consent.checkBannedList()
+    },
+
+    validate: () => {
+        if(arrayCookies.length != configCookies.length){
+            manage.deleteCookie(Config.Cookies.preferences.name)
+        }
+    },
+
+    set: (key) => {
+        if (key == false) {
+            manage.deleteCookie(Config.Cookies.preferences.name)
+        } else {
+            manage.setCookie(Config.Cookies.preferences.name, key, Config.Cookies.preferences.expire);
+        }
+    },
+
+}
 
 
 //-------------------------------------------------------
@@ -270,36 +312,27 @@ const localCookies = JSON.parse(CookieManage.getCookie('Kess'))
 
 
 
-TitleCase = (str) => {
-    return str.replace(
-      /\w\S*/g,
-      function(txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      }
-    );
-} 
-  
-const blockScript = (target, extraTag = false) => {
-    let elemento = document.getElementById(target)
-    if(elemento) {
-        elemento.setAttribute('type', javascriptBlocked)
-        if (extraTag === true) {
-            let extraScript = target + '_script'
-            document.getElementById(extraScript).setAttribute('type', javascriptBlocked)
-        }
-    }
-}
+// const blockScript = (target, extraTag = false) => {
+//     let elemento = document.getElementById(target)
+//     if(elemento) {
+//         elemento.setAttribute('type', javascriptBlocked)
+//         if (extraTag === true) {
+//             let extraScript = target + '_script'
+//             document.getElementById(extraScript).setAttribute('type', javascriptBlocked)
+//         }
+//     }
+// }
 
-const unblockScript = (target, extraTag = false) => {
-    let elemento = document.getElementById(target)
-    if(elemento) {
-        elemento.setAttribute('type', appJavascript)
-        if (extraTag === true) {
-            let extraScript = target + '_script'
-            document.getElementById(extraScript).setAttribute('type', appJavascript)
-        }
-    }
-}
+// const unblockScript = (target, extraTag = false) => {
+//     let elemento = document.getElementById(target)
+//     if(elemento) {
+//         elemento.setAttribute('type', appJavascript)
+//         if (extraTag === true) {
+//             let extraScript = target + '_script'
+//             document.getElementById(extraScript).setAttribute('type', appJavascript)
+//         }
+//     }
+// }
 
 
 //
@@ -307,6 +340,16 @@ const unblockScript = (target, extraTag = false) => {
 // Render Elements
 //-------------------------------------------------------
 render = {
+        
+    TitleCase: (str) => {
+        return str.replace(
+        /\w\S*/g,
+        function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }
+        );
+    },
+  
     IconBack : (node) => {
     let iconSvg = document.createElementNS(w3orgSvg, 'svg');
     iconSvg.setAttribute('viewBox', '0 0 448 512');
@@ -462,7 +505,7 @@ render = {
                                 cookie_li.appendChild(iconPlus)
                                 let h2_li = document.createElement('h2')
                                 // title
-                                h2_li.innerHTML = TitleCase(title)
+                                h2_li.innerHTML = render.TitleCase(title)
                                 cookie_li.appendChild(h2_li)
                                 let label_checkbox = create.Element('label', { class: 'custom_checkbox' })
                                 cookie_li.appendChild(label_checkbox)
@@ -552,75 +595,9 @@ render = {
 
 Cookie = {
     
-    validate: () => {
-        if(arrayCookies.length != configCookies.length){
-            CookieManage.deleteCookie(Config.Cookies.preferences.name)
-        }
-    },
+    
 
-    // verifica o local storage e assinala as atribuiçoes de configurações
-    checkConfig: () => {
-        // procura configurações na maquina local
-        // ou melhor rodar um foreach nas configurações locais do cookie e verificar
-        // quais wanted = true pra cada um setar o checkbox pra true pegando o elemento
-        // pelo id ex: document.getElementById('giveaway').checked = true
-        // pra diferenciar setar os ids como check_'nome'
-        // pegar o consent e gerar o form de opções
-        if (!CookieManage.getCookie(Config.Cookies.preferences.name)){
-            // console.log('cookie consent nao existe') entao cria o script por padrao
-            // default setup when user not accepted or declined
-            // consentBarShow()
-            if (configCookies){
-                for( let i = 0; i < configCookies.length; i++){
-                    create.Script(configCookies[i])
-                }
-            }
-            // all inputs checked by default when user not consented yet
-            for (let i = 0; i < configCookies.length; i++) {
-                let input = document.getElementById('chk_' + configCookies[i][0])
-                if(input) { input.checked = true }
-            }
-
-        } else {
-            // consent existe entao verifica a validação do consent 
-            // floaterVisible()
-            // seta os inputs baseado nas configurações do cookie salvas
-            for (const [key, value] of arrayCookies) {
-                // aqui eu percorro um for pelas configurações setadas da ultima vez
-                // console.log(`${key}: ${value}`);
-                let wanted = localCookies.cookies[key].wanted
-                let input = document.getElementById('chk_' + key)
-                // debugger
-                if (input){
-                    input.checked = wanted == true ? wanted : false
-                }
-            }
-            if (localCookies.value == false){
-                // when user declined for our cookies we need block the null scripts and not load others
-                // cada script false or script null devem ser bloqueados
-                // floaterHide()
-                // cookieWrapper.style.display = "none";
-                // consentBarShow()
-                // TODO .. aqui deve-se procurar as google tags e remover
-                // talvez utilizar uma blacklist pra procurar e remover todos da lista
-                for ( i=0; i< configCookies.length; i++ ) {
-                    let cookie = configCookies[i][0]
-                    let cookieInfo = configCookies[i][1]
-                    if (cookieInfo.script != true){
-                        let tagSetup = cookieInfo.scriptTag === true ? true : false
-                        blockScript(cookie, tagSetup)
-                    }
-                }
-            }else {
-                // consent = true , consent já configurado entao deve-se verificar quais as configurações atraves do atributo wanted
-                for ( i=0 ; i < arrayCookies.length ; i++){
-                    create.Script(arrayCookies[i])
-                }
-            }
-        }
-        // return cookie
-    },
-
+    
     init: () => { 
         render.CookieSettingsElements() 
         //-------------------------------------------------------
@@ -641,7 +618,7 @@ Cookie = {
         const cookieConsentBar = document.querySelector("#cconsent-bar")
                 
         close.addEventListener("click", function () {
-            if (!CookieManage.getCookie(Config.name)){
+            if (!manage.getCookie(Config.name)){
                 consentBarShow()
                 cookieWrapper.style.display = "none";
             }else {
@@ -700,8 +677,8 @@ Cookie = {
             cookieFloater.style.display = "none";
         }
         cookiePreferences = () => {
-            back.style.display = "none";
-            front.style.display = "flex";
+            back.style.display = "flex";
+            // front.style.display = "flex";
         }
         cookieMorePreferences = () => {
             // front.style.display = "none";
@@ -709,7 +686,7 @@ Cookie = {
             back.style.display = "flex";
         }
 
-        Cookie.validate()
+        Consent.validate()
         Cookie.checkConfig()
 
         //-------------------------------------------------------
@@ -757,12 +734,100 @@ Cookie = {
         }
     },
     
-    setConsent: (key) => {
-        if (key == false) {
-            CookieManage.deleteCookie(Config.Cookies.preferences.name)
+
+    // verifica o local storage e assinala as atribuiçoes de configurações
+    checkConfig: () => {
+        // procura configurações na maquina local
+        // ou melhor rodar um foreach nas configurações locais do cookie e verificar
+        // quais wanted = true pra cada um setar o checkbox pra true pegando o elemento
+        // pelo id ex: document.getElementById('giveaway').checked = true
+        // pra diferenciar setar os ids como check_'nome'
+        // pegar o consent e gerar o form de opções
+        // debugger
+        if (!manage.getLocalStorage(defaultConsentName)){
+            // console.log('cookie consent nao existe') entao cria o script por padrao
+            // default setup when user not accepted or declined
+            // consentBarShow()
+            // TODO.. this is default... should we show all?
+            if (configCookies){
+                // for( let i = 0; i < configCookies.length; i++){
+                // }
+                // all inputs checked by default when user not consented yet
+                
+                for (let i = 0; i < configCookies.length; i++) {
+                    let key = configCookies[i][0]
+                    let wanted = Config.Cookies.template[key].wanted === undefined ? Config.settings.defaultConsent : Config.Cookies.template[key].wanted
+                    let input = document.getElementById('chk_' + key)
+                    if(input) { 
+                        input.checked = wanted
+                    }
+                    if (wanted === true) {
+                        create.Script(configCookies[i])
+                    }
+                }
+            }
+
         } else {
-            CookieManage.setCookie(Config.Cookies.preferences.name, key, Config.Cookies.preferences.expire);
+            // consent existe entao verifica a validação do consent 
+            if (manage.getLocalStorage(defaultConsentName) === 'declined'){
+                // when user declined for our cookies we need block the null scripts and not load others
+                // cada script false or script null devem ser bloqueados
+                // floaterHide()
+                // cookieWrapper.style.display = "none";
+                // consentBarShow()
+                // TODO .. aqui deve-se procurar as google tags e remover
+                // talvez utilizar uma blacklist pra procurar e remover todos da lista
+                for ( i=0; i< configCookies.length; i++ ) {
+                    // Consent.clearCookies()
+                    for (const [key, value] of configCookies) {
+                        // aqui eu percorro um for pelas configurações setadas da ultima vez
+                        // console.log(`${key}: ${value}`);
+                        // user declined then false by default
+                        let wanted = false
+                        // let wanted = Config.Cookies.template[key].wanted === undefined ? Config.Default.consent : Config.Cookies.template[key].wanted
+                        let input = document.getElementById('chk_' + key)
+                        if (input){
+                            input.checked = wanted == true ? wanted : false
+                        }
+                    }
+                    // let cookie = configCookies[i][0]
+                    // let cookieInfo = configCookies[i][1]
+                    // if (cookieInfo.script != true){
+                    //     let tagSetup = cookieInfo.scriptTag === true ? true : false
+                    //     debugger
+                    //     blockScript(cookie, tagSetup)
+                    // }
+                }
+            }else {
+                // consent = true , consent já configurado entao deve-se verificar quais as configurações atraves do atributo wanted
+                Consent.checkBannedList()
+                for (let i = 0; i < arrayCookies.length; i++) {
+                    let key = arrayCookies[i][0]
+                    let wanted = localCookies.cookies[key].wanted === undefined ? Config.Default.consent : localCookies.cookies[key].wanted
+                    let input = document.getElementById('chk_' + key)
+                    if(input) { 
+                        input.checked = wanted
+                    }
+                    if (wanted === true) {
+                        create.Script(configCookies[i])
+                    }
+                }
+            }
+            // floaterVisible()
+            // seta os inputs baseado nas configurações do cookie salvas
+            // for (const [key, value] of arrayCookies) {
+            //     // aqui eu percorro um for pelas configurações setadas da ultima vez
+            //     // console.log(`${key}: ${value}`);
+            //     let wanted = localCookies.cookies[key].wanted
+            //     let input = document.getElementById('chk_' + key)
+            //     // debugger
+            //     if (input){
+            //         input.checked = wanted == true ? wanted : false
+            //     }
+            // }
+            
         }
+        // return cookie
     },
 
     getAll: () => document.cookie.split(';').reduce((ac, str) => Object.assign(ac, {[str.split('=')[0].trim()]: str.split('=')[1]}), {}),
@@ -777,7 +842,7 @@ Cookie = {
     },
         
     bake: (preferences, action = 'setCookie', form = false) => {
-        // prepareCookies tem por padrao a ação de inserir 'setCookie' ex: CookieManage.getCookie('_ga') and delete him
+        // prepareCookies tem por padrao a ação de inserir 'setCookie' ex: manage.getCookie('_ga') and delete him
         setAllConsent = (value) => {
             for (i=0; i < configCookies.length; i++){
                 let n = configCookies[i][0]
@@ -799,11 +864,17 @@ Cookie = {
         }
         if (action === 'setCookie') {
             if (preferences.length === 0){
+                // user declined consent
                 // TODO.. need detect and exclude _ga and _gi if exist to complete the remotion of analytics cookies
-                clearCookies()
+                
                 setAllConsent(false)
-                Config.consent.value = false
-                Cookie.setConsent(JSON.stringify(Config.consent))
+                // Config.consent.value = false
+                manage.setLocalStorage(defaultConsentName, 'declined')
+                // if(manage.getLocalStorage(defaultConsentName)){
+                //     manage.deleteLocalStorage(defaultConsentName)
+                // }
+                // Consent.set(JSON.stringify(Config.consent))
+                Consent.clearCookies()
                 setTimeout(() => {
                     window.location.reload()
                 }, "1000") 
@@ -812,23 +883,26 @@ Cookie = {
             if(form === true) {
                 for (let i = 0; i < preferences.length; i++){
                     setConsentByForm(preferences)
-                    Cookie.setConsent(JSON.stringify(Config.consent))
+                    manage.setLocalStorage(defaultConsentName, 'accepted')
+                    Consent.set(JSON.stringify(Config.consent))
                 }
                 setTimeout(() => {
                     window.location.reload()
                 }, "1000") 
             } else if (preferences.length === configCookies.length) {
                 setAllConsent(true)
-                Cookie.setConsent(JSON.stringify(Config.consent))
+                manage.setLocalStorage(defaultConsentName, 'accepted')
+                Consent.set(JSON.stringify(Config.consent))
                 setTimeout(() => {
                     window.location.reload()
                 }, "1000") 
             }
         } else if (action === 'deleteCookie') {
-            clearCookies()
+            Consent.clearCookies()
             setAllConsent(false)
             Config.consent.value = false
-            Cookie.setConsent(JSON.stringify(Config.consent))
+            Consent.set(JSON.stringify(Config.consent))
+            manage.setLocalStorage(defaultConsentName, 'declined')
             setTimeout(() => {
                 window.location.reload()
             }, "1000") 
