@@ -27,14 +27,16 @@ Config.Default = {
 //-------------------------------------------------------
 //-------------------------------------------------------
 
+Config.Cookies.preferences = Config.Cookies.preferences === undefined ? {} : Config.Cookies.preferences
+
 Config.settings = {
-    name : Config.Cookies.preferences.name ? Config.Cookies.preferences.name : Config.Default.name,
-    description: Config.Cookies.preferences.description ? Config.Cookies.preferences.description : Config.Default.description,
-    url: Config.Cookies.preferences.website ? Config.Cookies.preferences.website : Config.Default.url,
-    privacyPage: Config.Cookies.preferences.privacyPage ? Config.Cookies.preferences.privacyPage : Config.Default.privacy,
-    termsPage: Config.Cookies.preferences.termsPage ? Config.Cookies.preferences.termsPage : Config.Default.terms,
-    expire: Config.Cookies.preferences.expire ? Config.Cookies.preferences.expire : Config.Default.expire,
-    defaultConsent: Config.Cookies.preferences.consent ? Config.Cookies.preferences.consent : Config.Default.consent,
+    name : Config.Cookies.preferences.name === undefined ? Config.Default.name : Config.Cookies.preferences.name,
+    description: Config.Cookies.preferences.description === undefined ? Config.Default.description : Config.Cookies.preferences.description,
+    url: Config.Cookies.preferences.website === undefined ? Config.Default.url : Config.Cookies.preferences.website,
+    privacyPage: Config.Cookies.preferences.privacyPage === undefined ? Config.Default.privacy : Config.Cookies.preferences.privacyPage,
+    termsPage: Config.Cookies.preferences.termsPage === undefined ? Config.Default.terms : Config.Cookies.preferences.termsPage,
+    expire: Config.Cookies.preferences.expire === undefined ? Config.Default.expire : Config.Cookies.preferences.expire,
+    defaultConsent: Config.Cookies.preferences.consent === undefined ? Config.Default.consent : Config.Cookies.preferences.consent,
     version: 1
 },
 
