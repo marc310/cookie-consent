@@ -2,16 +2,31 @@
 <html lang="en">
 <head>
 
-<script src="./assets/js/cookies.config.js"></script>
-<script src="./assets/js/cookies.core.js"></script>
+    
+<script src="assets/js/core.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <!-- <script id="analytics" crossorigin="anonymous" async src="https://www.googletagmanager.com/gtag/js?id=UA-145014090-1"></script> -->
+    <script id="analytics_script" >
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-145014090-1');
+    </script>
 
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cookie Consent</title>
-    <link rel="stylesheet" href="assets/css/cookies.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
+
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5P6FZT4"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <!-- ShareThis BEGIN -->
     <div class="sharethis-inline-share-buttons mb-5"></div>

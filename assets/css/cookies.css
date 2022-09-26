@@ -126,7 +126,7 @@ body {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  display: none;
+  /* display: none; */
 }
 
 .back_icon, .back_icons{
