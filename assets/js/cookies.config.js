@@ -61,7 +61,7 @@ const Config = {
 
 
 
-// all your code here
+// all magic happens here
 let cconsent = document.createElement('script');
     cconsent.setAttribute('src', `./assets/js/cookies.core.js`);
     document.head.appendChild(cconsent);

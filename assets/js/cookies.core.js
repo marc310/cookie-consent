@@ -63,6 +63,15 @@ Config.consent = {
 }
 
 
+
+lang = {
+    en: {
+        default_statusInactive : 'Off',
+        default_statusActive : 'On',
+    }
+}
+
+
 //-------------------------------------------------------
 // Banned list 
 // will give a list to script search and delete after user decline the consents
@@ -81,7 +90,6 @@ bannedList = {
     ],
 }
     
-
 
 const w3orgSvg = 'http://www.w3.org/2000/svg'
 const javascriptBlocked = 'text/plain'
@@ -521,6 +529,13 @@ render = {
       
         return node.appendChild(iconSvg);
     },
+
+    badge: (label, status = false) => {
+        let classStatus = status != false ? status : 'success' 
+        let span_badge = create.Element('span', { class: 'baged ' + classStatus })
+            span_badge.innerHTML = label
+            return span_badge
+    },
     CookieSettingsElements: () => {
     
         let div_cookie_wrapper = create.Element('div', { class: 'cookie_wrapper' })
@@ -598,8 +613,7 @@ render = {
                                 let h2_li = document.createElement('h2')
                                 h2_li.innerHTML = 'Strictly Necessary Cookies'
                                 cookie_li.appendChild(h2_li)
-                                let span_badge = create.Element('span', { class: 'baged success' })
-                                span_badge.innerHTML = 'Always Active'
+                                let span_badge = render.badge('Always Active')
                                 cookie_li.appendChild(span_badge)
                             let cookie_li_data = create.Element('div', { class: 'data2' })
                             cookie_options_tab.appendChild(cookie_li_data)
@@ -611,6 +625,7 @@ render = {
                         for (let i = 0; i < configCookies.length; i++){
                             let cookie_name = configCookies[i][0]
                             let description_cookie = configCookies[i][1].description
+                            // TODO.. adjust name title
                             let title = cookie_name == 'giveaway' ? 'Third-Party Cookies' : cookie_name + ' Cookies'
                             let cookie_li = document.createElement('li')
                             cookie_options_tab.appendChild(cookie_li)
@@ -620,12 +635,19 @@ render = {
                                 // title
                                 h2_li.innerHTML = render.TitleCase(title)
                                 cookie_li.appendChild(h2_li)
+                                // checkbox
+                                // TODO.. incluir botao badge pra identificar o status
+                                let status = render.badge(lang.en.default_statusInactive, 'status default')
+                                status.setAttribute('id', cookie_name+'_status')
+                                cookie_li.appendChild(status)
+
                                 let label_checkbox = create.Element('label', { class: 'custom_checkbox' })
                                 cookie_li.appendChild(label_checkbox)
                                 let input_checkbox = create.Element('input', { 
                                     type: 'checkbox',
                                     'data-function': cookie_name,
-                                    id: 'chk_' + cookie_name
+                                    id: 'chk_' + cookie_name,
+                                    onclick: 'Cookie.selectorChange(this)'
                                 })
                                 label_checkbox.appendChild(input_checkbox)
                                 let span_toogle = create.Element('span', {class: 'toogle'})
@@ -707,9 +729,6 @@ render = {
 
 
 Cookie = {
-    
-    
-
     
     init: () => { 
         render.CookieSettingsElements() 
@@ -847,6 +866,21 @@ Cookie = {
         }
     },
     
+    selectorChange: (el) => {
+        console.log(el.id)
+        labelBadge = el.id.replace('chk_', '') + '_status'
+        label = document.getElementById(labelBadge)
+        if(el.checked === true) {
+            label.classList.add('success')
+            label.classList.remove('default')
+            label.innerHTML = lang.en.default_statusActive
+        } else {
+            label.classList.add('default')
+            label.classList.remove('success')
+            label.innerHTML = lang.en.default_statusInactive
+        }
+
+    },
 
     // verifica o local storage e assinala as atribuiçoes de configurações
     checkConfig: () => {
@@ -887,7 +921,6 @@ Cookie = {
                 // floaterHide()
                 // cookieWrapper.style.display = "none";
                 // consentBarShow()
-                // TODO .. aqui deve-se procurar as google tags e remover
                 // talvez utilizar uma blacklist pra procurar e remover todos da lista
                 for ( i=0; i< configCookies.length; i++ ) {
                     // Consent.clearCookies()
@@ -917,6 +950,14 @@ Cookie = {
                     let key = arrayCookies[i][0]
                     let wanted = localCookies.cookies[key].wanted === undefined ? Config.Default.consent : localCookies.cookies[key].wanted
                     let input = document.getElementById('chk_' + key)
+                    let status = document.getElementById(key + '_status')
+
+                    status.innerHTML = wanted === true ? lang.en.default_statusActive : lang.en.default_statusInactive
+                    if(wanted) {
+                        status.classList.add('class', 'success')
+                        status.classList.remove('class', 'default')
+                    }
+
                     if(input) { 
                         input.checked = wanted
                     }

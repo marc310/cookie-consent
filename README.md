@@ -3,9 +3,11 @@
 
 # Let's Get Started
 
-Optional ways, using local file or include script using CDN to get the latest and updated version
+Optional ways, using local file or include script using CDN to get the latest and updated version the core script will generate this file don't need setup this file on header
+just setup on Config.Cookies.preferences we have two new variables can be set as useJsCDN: true/false and useCssCDN: true/false,
 CDN: https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/js/cookies.core.js
-include also the css file https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/css/cookies.css
+
+the core script will include also the css file https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/css/cookies.css don't need setup this
 
 set preferences creating an javascript object on script tag before the core script
 
@@ -17,27 +19,34 @@ In this Object take attention at the script specification
     
 > script false : that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
 
-> the script null && AnalyticsCode || FacebookCode mean the script should construct the analytics or facebook script code and you just need give the user_id like on example...
+> the script null && ga_code || fb_code || sc_project for statcounter: this mean the script should construct the analytics or facebook script code and you just need give the user_id like on example...
 
 > 
     const Config = {
-        
+
         Cookies : {
+            
+            //-------------------------------------------------------
+            // Cookies Template Configuration
             template: {
                 analytics: {
                     title: 'Google Analytics',
                     category: 'Analytics',
-                    AnalyticsCode: 'UA-145014090-1', // 
+                    ga_code: 'UA-145014090-1',
                     description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
                     script: null, // script null means the script not will be loaded, and the code will search on DOM by the cookie name
+                    // wanted: true
                     // scriptTag: true,
                 },
                 statcounter: {
                     title: 'Stat Counter',
                     category: 'Performance',
-                    src: 'https://statcounter.com/counter/counter.js',
+                    sc_project: '12799177',
+                    sc_security: 'cef97f6c',
+                    sc_invisible: 0,
+                    sc_text: 3,
                     description: 'tracking cookies test with statcounter',
-                    script: true,
+                    script: null,
                 },
                 marketing: {
                     title: 'Share This',
@@ -54,18 +63,32 @@ In this Object take attention at the script specification
                     script: false, // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
                 }
             },
-
+            
+            //-------------------------------------------------------
+            // Preferences Setup
             preferences: {
                 name: 'Kess',
                 website: 'https://kessgame.com/',
-                expire: 15
-
+                expire: 15,
+                description: 'Cookie notice bars are not enough!',
+                terms: 'terms.html',
+                privacy: 'privacy.html',
+                useJsCDN: false,
+                useCssCDN: false,
             },
         },
-
     }
 
 this setting change everything in how the script will be loaded
+let the script config call the core.js just include this simple function at the bottom
+
+>
+    // all magic happens here
+    let cconsent = document.createElement('script');
+        cconsent.setAttribute('src', `./assets/js/cookies.core.js`);
+        document.head.appendChild(cconsent);
+    // ...
+
 
 # Configure your Tags (deprecated)
 if using any script should have any extra tag like analytics configure giving a name tag for him like this example
@@ -92,6 +115,7 @@ if you using any script should be inserted on body page you will need configure 
 > 
     {
         name: 'Kess', 
+        version: 1
         timestamp: 1663883349107, 
         value: true, 
         cookies: {

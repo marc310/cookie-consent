@@ -231,7 +231,8 @@ body {
 }
 
 .custom_checkbox {
-  margin-left: auto;
+  margin-left: 10px;
+  margin-right: 0;
   cursor: pointer;
 }
 
