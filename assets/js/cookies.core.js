@@ -56,7 +56,7 @@ Config.settings = {
 //-------------------------------------------------------
 Config.consent = {
     version: 1,
-    value: true,
+    // value: true,
     timestamp: new Date().getTime(),
     cookies : {
     }
@@ -67,7 +67,7 @@ Config.consent = {
 lang = {
     en: {
         default_statusInactive : 'Off',
-        default_statusActive : 'On',
+        default_statusActive : 'Active',
     }
 }
 
@@ -867,7 +867,7 @@ Cookie = {
     },
     
     selectorChange: (el) => {
-        console.log(el.id)
+        // console.log(el.id)
         labelBadge = el.id.replace('chk_', '') + '_status'
         label = document.getElementById(labelBadge)
         if(el.checked === true) {
@@ -1010,7 +1010,7 @@ Cookie = {
                 let content = configCookies[i][1]
                 Config.consent.cookies[n] = {}
                 Config.consent.cookies[n].wanted = value
-                Config.consent.cookies[n].script = content.script
+                // Config.consent.cookies[n].script = content.script
             }
         }
         // 
@@ -1063,7 +1063,7 @@ Cookie = {
         } else if (action === 'deleteCookie') {
             Consent.clearCookies()
             setAllConsent(false)
-            Config.consent.value = false
+            // Config.consent.value = false
             Consent.set(JSON.stringify(Config.consent))
             manage.setLocalStorage(defaultConsentName, 'declined')
             setTimeout(() => {
