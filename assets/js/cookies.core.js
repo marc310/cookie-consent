@@ -101,6 +101,15 @@ const space = ' '
 
 
 //-------------------------------------------------------
+//-------------------------------------------------------
+//-------------------------------------------------------
+//-------------------------------------------------------
+//-------------------------------------------------------
+//-------------------------------------------------------
+
+
+
+//-------------------------------------------------------
 // Create Elements
 //-------------------------------------------------------
 
@@ -136,17 +145,17 @@ create = {
                 //
                 // lets decide what kind of script should be generated
                 if(ConfigPath.ga_code){
-                    // console.log('cria analytics')
                     create.Analytics(ConfigPath.ga_code)
                 } else if (ConfigPath.fb_code) {
-                    // console.log('cria facebook script')
                     create.Facebook(ConfigPath.fb_code)
-                } else if (ConfigPath.sc_project) {
+                } else if (ConfigPath.hj_code) {
+                    create.Hotjar(ConfigPath.hj_code)
+                }
+                else if (ConfigPath.sc_project) {
                     let project = ConfigPath.sc_project
                     let security = ConfigPath.sc_security
                     let invisible = ConfigPath.sc_invisible
                     let text = ConfigPath.sc_text
-
                     create.Statcounter(project, security, invisible, text)
                 }
                 // else {
@@ -207,6 +216,21 @@ create = {
                                 gtag('js', new Date());
                                 gtag('config', '${ga_code}');`;
         document.head.appendChild(AnalyticsData);
+    },
+
+    Hotjar: (hj_code) => {
+        let Hotjar = document.createElement('script');
+        Hotjar.text = `
+                        (function(h,o,t,j,a,r){
+                        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+                        h._hjSettings={hjid:${hj_code},hjsv:6};
+                        a=o.getElementsByTagName('head')[0];
+                        r=o.createElement('script');r.async=1;
+                        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+                        a.appendChild(r);
+                        })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+                        `;
+        document.head.appendChild(Hotjar);
     },
 
     Facebook: (fb_code)=> {
@@ -440,7 +464,6 @@ Consent = {
             }
         }
     },
-
     set: (key) => {
         if (key == false) {
             manage.deleteCookie(Config.Cookies.preferences.name)
