@@ -4,11 +4,13 @@ const Config = {
 
     Cookies : {
         
+        //-------------------------------------------------------
+        // Cookies Template Configuration
         template: {
             analytics: {
                 title: 'Google Analytics',
                 category: 'Analytics',
-                AnalyticsCode: 'UA-145014090-1',
+                ga_code: 'UA-145014090-1',
                 description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
                 script: null, // script null means the script not will be loaded, and the code will search on DOM by the cookie name
                 // wanted: true
@@ -17,9 +19,12 @@ const Config = {
             statcounter: {
                 title: 'Stat Counter',
                 category: 'Performance',
-                src: 'https://statcounter.com/counter/counter.js',
+                sc_project: '12799177',
+                sc_security: 'cef97f6c',
+                sc_invisible: 0,
+                sc_text: 3,
                 description: 'tracking cookies test with statcounter',
-                script: true,
+                script: null,
             },
             marketing: {
                 title: 'Share This',
@@ -36,7 +41,9 @@ const Config = {
                 script: false, // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
             }
         },
-
+        
+        //-------------------------------------------------------
+        // Preferences Setup
         preferences: {
             name: 'Kess',
             website: 'https://kessgame.com/',
@@ -44,7 +51,18 @@ const Config = {
             description: 'Cookie notice bars are not enough!',
             terms: 'terms.html',
             privacy: 'privacy.html',
+            useJsCDN: false,
+            useCssCDN: false,
         },
     },
 
 }
+
+
+
+
+// all your code here
+let cconsent = document.createElement('script');
+    cconsent.setAttribute('src', `./assets/js/cookies.core.js`);
+    document.head.appendChild(cconsent);
+// ...

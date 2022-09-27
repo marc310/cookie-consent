@@ -8,6 +8,8 @@
 :: Created: 22 Set 2022
 ************************************************************ */
 
+// const { create } = require("core-js/core/object")
+
 if (!Config) {
     console.log('The Config file are not properly configured, please set up the config file before continue.')
 }
@@ -21,10 +23,13 @@ Config.Default = {
     terms: 'terms.html',
     privacy: 'privacy.html',
     expire: 15,
-    consent: false
+    consent: false,
+    useJsCDN: false,
+    useCssCDN: false,
 },
 
 //-------------------------------------------------------
+// App Cookies Script Settings
 //-------------------------------------------------------
 
 Config.Cookies.preferences = Config.Cookies.preferences === undefined ? {} : Config.Cookies.preferences
@@ -37,19 +42,45 @@ Config.settings = {
     termsPage: Config.Cookies.preferences.termsPage === undefined ? Config.Default.terms : Config.Cookies.preferences.termsPage,
     expire: Config.Cookies.preferences.expire === undefined ? Config.Default.expire : Config.Cookies.preferences.expire,
     defaultConsent: Config.Cookies.preferences.consent === undefined ? Config.Default.consent : Config.Cookies.preferences.consent,
-    version: 1
+    cssCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/css/cookies.css',
+    jsCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/js/cookies.core.js',
+    cssLocal: './assets/css/cookies.css',
+    jsLocal: './assets/js/cookies.core.js',
+    useJsCDN: Config.Cookies.preferences.useJsCDN === undefined ? Config.Default.useJsCDN : Config.Cookies.preferences.useJsCDN,
+    useCssCDN: Config.Cookies.preferences.useCssCDN === undefined ? Config.Default.useCssCDN : Config.Cookies.preferences.useCssCDN,
 },
+
 
 //-------------------------------------------------------
 // Consent Setup
 //-------------------------------------------------------
 Config.consent = {
+    version: 1,
     value: true,
     timestamp: new Date().getTime(),
     cookies : {
     }
 }
 
+
+//-------------------------------------------------------
+// Banned list 
+// will give a list to script search and delete after user decline the consents
+//-------------------------------------------------------
+bannedList = {
+    cookies : [
+        '_gid',
+        '_ga',
+        '_fbp',
+        'euconsent-v2',
+        'pubconsent-v2',
+    ],
+    local : [
+        'sc_medium_source',
+        'statcounter.com/localstorage/'
+    ],
+}
+    
 
 
 const w3orgSvg = 'http://www.w3.org/2000/svg'
@@ -94,16 +125,25 @@ create = {
             if (script === null) {
                 // null scripts wanted true = application/javascript
                 let ConfigPath = Config.Cookies.template[tag]
-                if(ConfigPath.AnalyticsCode){
+                //
+                // lets decide what kind of script should be generated
+                if(ConfigPath.ga_code){
                     // console.log('cria analytics')
-                    create.Analytics(ConfigPath.AnalyticsCode)
-                } else if (ConfigPath.FacebookCode) {
+                    create.Analytics(ConfigPath.ga_code)
+                } else if (ConfigPath.fb_code) {
                     // console.log('cria facebook script')
-                    create.Facebook(ConfigPath.FacebookCode)
+                    create.Facebook(ConfigPath.fb_code)
+                } else if (ConfigPath.sc_project) {
+                    let project = ConfigPath.sc_project
+                    let security = ConfigPath.sc_security
+                    let invisible = ConfigPath.sc_invisible
+                    let text = ConfigPath.sc_text
+
+                    create.Statcounter(project, security, invisible, text)
                 }
-                else {
-                    unblockScript(tag, true)
-                }
+                // else {
+                //     unblockScript(tag, true)
+                // }
             }
         } else if (wanted === false && script === null) {
             let extraTag = Config.Cookies.template[tag].scriptTag === true ? true : false
@@ -115,6 +155,14 @@ create = {
         let script = create.Element('script', {
             type: type,
             src: url
+        })
+        document.head.appendChild(script);
+    },
+
+    CSS: (url) => {
+        let script = create.Element('link', {
+            rel: 'stylesheet',
+            href: url
         })
         document.head.appendChild(script);
     },
@@ -141,39 +189,92 @@ create = {
         }
     },
         
-    Analytics: (AnalyticsCode) => {
+    Analytics: (ga_code) => {
         let Analytics = document.createElement('script');
-      Analytics.setAttribute('src', `https://www.googletagmanager.com/gtag/js?id=${AnalyticsCode}`);
-      document.head.appendChild(Analytics);
-      let AnalyticsData = document.createElement('script');
-      AnalyticsData.text = `window.dataLayer = window.dataLayer || [];
+        Analytics.setAttribute('src', `https://www.googletagmanager.com/gtag/js?id=${ga_code}`);
+        document.head.appendChild(Analytics);
+        let AnalyticsData = document.createElement('script');
+        AnalyticsData.text = `window.dataLayer = window.dataLayer || [];
                                 function gtag(){dataLayer.push(arguments);}
                                 gtag('js', new Date());
-                                gtag('config', '${AnalyticsCode}');`;
-      document.head.appendChild(AnalyticsData);
+                                gtag('config', '${ga_code}');`;
+        document.head.appendChild(AnalyticsData);
     },
 
-    Facebook: (FacebookCode)=> {
+    Facebook: (fb_code)=> {
         let FacebookPixelData = document.createElement('script');
-      FacebookPixelData.text = `
-                                    !function(f,b,e,v,n,t,s)
-                                    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                                    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                                    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                                    n.queue=[];t=b.createElement(e);t.async=!0;
-                                    t.src=v;s=b.getElementsByTagName(e)[0];
-                                    s.parentNode.insertBefore(t,s)}(window, document,'script',
-                                    'https://connect.facebook.net/en_US/fbevents.js');
-                                    fbq('init', '${FacebookCode}');
-                                    fbq('track', 'PageView');
+        FacebookPixelData.text = `
+                                !function(f,b,e,v,n,t,s)
+                                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                                n.queue=[];t=b.createElement(e);t.async=!0;
+                                t.src=v;s=b.getElementsByTagName(e)[0];
+                                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                                'https://connect.facebook.net/en_US/fbevents.js');
+                                fbq('init', '${fb_code}');
+                                fbq('track', 'PageView');
                                 `;
-      document.head.appendChild(FacebookPixelData);
-      let FacebookPixel = document.createElement('noscript');
-      FacebookPixel.setAttribute('height', `1`);
-      FacebookPixel.setAttribute('width', `1`);
-      FacebookPixel.setAttribute('style', `display:none`);
-      FacebookPixel.setAttribute('src', `https://www.facebook.com/tr?id=${FacebookCode}&ev=PageView&noscript=1`);
-      document.head.appendChild(FacebookPixel);
+        document.head.appendChild(FacebookPixelData);
+        let FacebookPixel = document.createElement('noscript');
+        FacebookPixel.setAttribute('height', `1`);
+        FacebookPixel.setAttribute('width', `1`);
+        FacebookPixel.setAttribute('style', `display:none`);
+        FacebookPixel.setAttribute('src', `https://www.facebook.com/tr?id=${fb_code}&ev=PageView&noscript=1`);
+        document.head.appendChild(FacebookPixel);
+    },
+    
+    Statcounter: (sc_project, sc_security, sc_invisible = false, sc_text = false)=> {
+           
+        var var_invisible = sc_invisible === false ? 0 : sc_invisible; 
+        var var_text = sc_text === false ? 2 : sc_text; 
+        
+        let StatcounterVar = document.createElement('script');
+            StatcounterVar.text = `
+                            var sc_project = ${sc_project}; 
+                            var sc_security = "${sc_security}"; 
+                            var sc_invisible = ${var_invisible}; 
+                            var sc_text = ${var_text}; 
+                            `;
+            document.head.appendChild(StatcounterVar);   
+
+        let StatcounterScript = document.createElement('script');
+            StatcounterScript.setAttribute('src', `https://statcounter.com/counter/counter.js`);
+            StatcounterScript.setAttribute('async', true);
+            document.head.appendChild(StatcounterScript);
+
+        let noscript = document.createElement('noscript');
+            document.body.appendChild(noscript);
+            let statcounterDiv = create.Element('div', { class: 'statcounter' })
+                noscript.appendChild(statcounterDiv);
+                let statcounterLink = create.Element('a', {
+                        title: 'Web Analytics',
+                        href: 'https://statcounter.com/',
+                        target: '_blank'
+                    })
+                    statcounterDiv.appendChild(statcounterLink);
+                    let counterImgSrc = 'https://c.statcounter.com/' + sc_project + '/0/' + sc_security + '/' + var_invisible + '/'
+                    let statcounterImg = create.Element('img', {
+                        class: 'statcounter',
+                        src: counterImgSrc,
+                        alt: 'Web Analytics',
+                        referrerPolicy: 'no-referrer-when-downgrade'
+                    })
+                    statcounterLink.appendChild(statcounterImg);
+
+
+            // document.body.write = `
+            //                     <noscript>
+            //                     <div class="statcounter">
+            //                     <a title="Web Analytics" href="https://statcounter.com/" target="_blank">
+            //                     <img class="statcounter" src="https://c.statcounter.com/${sc_project}/0/${sc_security}/${var_invisible}/" alt="Web Analytics"
+            //                     referrerPolicy="no-referrer-when-downgrade">
+            //                     </a>
+            //                     </div>
+            //                     </noscript>
+            //                     `;
+
+            // document.body.appendChild(StatcounterData);
     },
     
 
@@ -208,6 +309,8 @@ isEmptyParam = (a) => {
 // Local Storage Functional Actions
 //-------------------------------------------------------
 manage = {
+    //-------------------------------------------------------
+    // Cookies Manager
     getCookie: function (c) {
         var b = document.cookie;
         var e = c + "=";
@@ -236,6 +339,8 @@ manage = {
             manage.setCookie(a, "", -1, "")
         }
     },
+    //-------------------------------------------------------
+    // Local Storage Manager
 	setLocalStorage:function(a,b) {
         window.localStorage.setItem(a, b);
     },
@@ -250,6 +355,29 @@ manage = {
     },
     deleteLocalStorage: function (a) {
         window.localStorage.removeItem(a);
+    },
+    clearLocal: function (a) {
+        window.localStorage.clear();
+    },
+    //-------------------------------------------------------
+    // Session Storage Manager
+	setSessionStorage:function(a,b) {
+        window.sessionStorage.setItem(a, b);
+    },
+    getSessionStorage: function (a) {
+        var c = window.sessionStorage.getItem(a);
+        if ( c != null) {
+            
+            return c;
+        } else {
+            return "";
+        }
+    },
+    deleteSessionStorage: function (a) {
+        window.sessionStorage.removeItem(a);
+    },
+    clearSession: function (a) {
+        window.sessionStorage.clear();
     }
 }
 
@@ -268,20 +396,21 @@ const defaultConsentName = Config.settings.name + '_consent'
 
 
 
-bannedList = [
-    '_gid',
-    '_ga',
-    'euconsent-v2',
-    'pubconsent-v2'
-]
 
 Consent = {
     checkBannedList: ()=>{
-        for(let i = 0; i < bannedList.length; i++) {
-            let target = bannedList[i]
+        for(let i = 0; i < bannedList.cookies.length; i++) {
+            let target = bannedList.cookies[i]
             let cookie = manage.getCookie(target)
             if(cookie) {
                 manage.deleteCookie(target)
+            }
+        }
+        for(let i = 0; i < bannedList.local.length; i++) {
+            let target = bannedList.local[i]
+            let local = manage.getLocalStorage(target)
+            if(local) {
+                manage.deleteLocalStorage(target)
             }
         }
     },
@@ -294,6 +423,13 @@ Consent = {
     validate: () => {
         if(arrayCookies.length != configCookies.length){
             manage.deleteCookie(Config.Cookies.preferences.name)
+        }
+        if (localCookies) {
+            let version = Config.consent.version != localCookies.version ? true : false
+            // retorna true se for diferente
+            if (version === true) {
+                manage.deleteCookie(Config.Cookies.preferences.name)
+            }
         }
     },
 
@@ -311,31 +447,6 @@ Consent = {
 //-------------------------------------------------------
 // Create Form elements
 //-------------------------------------------------------
-
-
-
-// const blockScript = (target, extraTag = false) => {
-//     let elemento = document.getElementById(target)
-//     if(elemento) {
-//         elemento.setAttribute('type', javascriptBlocked)
-//         if (extraTag === true) {
-//             let extraScript = target + '_script'
-//             document.getElementById(extraScript).setAttribute('type', javascriptBlocked)
-//         }
-//     }
-// }
-
-// const unblockScript = (target, extraTag = false) => {
-//     let elemento = document.getElementById(target)
-//     if(elemento) {
-//         elemento.setAttribute('type', appJavascript)
-//         if (extraTag === true) {
-//             let extraScript = target + '_script'
-//             document.getElementById(extraScript).setAttribute('type', appJavascript)
-//         }
-//     }
-// }
-
 
 //
 //-------------------------------------------------------
@@ -607,12 +718,12 @@ Cookie = {
         //-------------------------------------------------------
         const close = document.querySelector(".close");
         const cookieWrapper = document.querySelector(".cookie_wrapper");
-        const front = document.querySelector(".front");
+        // const front = document.querySelector(".front");
         const back = document.querySelector(".back");
-        const more = document.querySelector("#more_cookie");
-        const backicon = document.querySelector(".back_icon");
+        // const more = document.querySelector("#more_cookie");
+        // const backicon = document.querySelector(".back_icon");
         const cookieFloater = document.querySelector(".cookie_floater");
-        const allowCookies = document.querySelector('#allowCookies');
+        // const allowCookies = document.querySelector('#allowCookies');
         // const declineCookies = document.querySelector('#declineCookies');
         const confirmCookies = document.querySelector('#confirmCookies');
         const cookieSettings = document.querySelector(".ccb__edit")
@@ -694,7 +805,7 @@ Cookie = {
         //-------------------------------------------------------
         // Event Listeners
         //-------------------------------------------------------
-        const allPrefs = getAllPref()
+        const allPrefs = Cookie.getAllPref()
 
         cookieSettings.addEventListener("click", () => {
             cookieWrapper.style.display = "flex";
@@ -702,7 +813,7 @@ Cookie = {
         })
 
         confirmCookies.addEventListener("click", ()=> {
-            const pref = getFormPref();
+            const pref = Cookie.getFormPref();
             Cookie.bake(pref, setCookie, true)
             floaterVisible()
         });
@@ -745,7 +856,6 @@ Cookie = {
         // pelo id ex: document.getElementById('giveaway').checked = true
         // pra diferenciar setar os ids como check_'nome'
         // pegar o consent e gerar o form de opções
-        // debugger
         if (!manage.getLocalStorage(defaultConsentName)){
             // console.log('cookie consent nao existe') entao cria o script por padrao
             // default setup when user not accepted or declined
@@ -833,7 +943,15 @@ Cookie = {
     },
 
     getAll: () => document.cookie.split(';').reduce((ac, str) => Object.assign(ac, {[str.split('=')[0].trim()]: str.split('=')[1]}), {}),
-    
+        
+    getFormPref: () => {
+        return [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
+    },
+
+    getAllPref: () => {
+        return [...document.querySelectorAll('[data-function]')].filter((el) => el).map((el) => el.getAttribute('data-function'));
+    },
+
     list: () => {
         var theCookies = document.cookie.split(';');
         var aString = '';
@@ -869,13 +987,15 @@ Cookie = {
                 // user declined consent
                 // TODO.. need detect and exclude _ga and _gi if exist to complete the remotion of analytics cookies
                 
-                setAllConsent(false)
+                // setAllConsent(false)
                 // Config.consent.value = false
-                manage.setLocalStorage(defaultConsentName, 'declined')
+                // manage.setLocalStorage(defaultConsentName, 'declined')
                 // if(manage.getLocalStorage(defaultConsentName)){
                 //     manage.deleteLocalStorage(defaultConsentName)
                 // }
                 // Consent.set(JSON.stringify(Config.consent))
+                manage.clearLocal()
+                manage.clearSession()
                 Consent.clearCookies()
                 setTimeout(() => {
                     window.location.reload()
@@ -918,21 +1038,22 @@ Cookie = {
 //-------------------------------------------------------
 //-------------------------------------------------------
 //-------------------------------------------------------
-// Starting
-Cookie.checkConfig()
 
-//-------------------------------------------------------
-//-------------------------------------------------------
-//-------------------------------------------------------
-
-
-getFormPref = () => {
-    return [...document.querySelectorAll('[data-function]')].filter((el) => el.checked).map((el) => el.getAttribute('data-function'));
-}
-getAllPref = () => {
-    return [...document.querySelectorAll('[data-function]')].filter((el) => el).map((el) => el.getAttribute('data-function'));
-}
 
 //-------------------------------------------------------
 // Cookie Preparation
+//-------------------------------------------------------
+// Starting
+
+// Cookie.checkConfig()
+create.CSS(Config.settings.useCssCDN === true ? Config.settings.cssCDN : Config.settings.cssLocal)
+
+let scriptInit = create.Element('script', { type : appJavascript })
+    scriptInit.text = `
+                    Cookie.init()
+                    `;
+document.body.after(scriptInit);
+
+//-------------------------------------------------------
+//-------------------------------------------------------
 //-------------------------------------------------------
