@@ -455,6 +455,7 @@ class Cookie {
         },
 
         checkBannedList: ()=>{
+            this.consent.searchGtag()
             for(let i = 0; i < Config.bannedList.cookies.length; i++) {
                 let target = Config.bannedList.cookies[i]
                 let cookie = this.manage.getCookie(target)
@@ -481,6 +482,7 @@ class Cookie {
             let configCookies = Object.entries(Config.Cookies.template)
             let arrayCookies = this.manage.arrayCookies()
             let localCookies = this.manage.localCookies()
+            
             let localStorageSettings = this.manage.getLocalStorage(this.defaultConsentName) // accepted
             if(arrayCookies){
                 if(arrayCookies.length != configCookies.length){
@@ -489,6 +491,7 @@ class Cookie {
             }
             if(localCookies === null || !localCookies.cookies.analytics || localCookies.cookies.analytics.wanted != true){
                 this.consent.searchGtag()
+                this.consent.checkBannedList()
             }
             if (localCookies) {
                 let version = this.settings.consent.version != localCookies.version ? true : false
@@ -644,7 +647,7 @@ class Cookie {
                     }
                 }else {
                     // consent = true , consent já configurado entao deve-se verificar quais as configurações atraves do atributo wanted
-                    this.consent.validate()
+                    // this.consent.validate()
                     this.consent.checkBannedList()
                     this.setSelectors()
                 //     let arrayCookies = this.manage.arrayCookies()
@@ -949,7 +952,7 @@ class Cookie {
                         let cc_left = this.create.Element('div', { class: 'ccb__left'})
                             cc_wrapper.appendChild(cc_left)
                             let cc_text = this.create.Element('div', { class: 'cc-text'})
-                                cc_text.innerHTML = 'This website uses cookies to ensure you get the best experience on our website.'
+                                cc_text.innerHTML = Config.lang.en.consent_bar_message
                                 cc_left.appendChild(cc_text)
                         //
                         let cc_right = this.create.Element('div', { class: 'ccb__right'})
@@ -968,7 +971,7 @@ class Cookie {
                                     class: 'consent__give',
                                     type: 'submit',
                                 })
-                                buttonConsent.innerHTML = 'Accept all cookies'
+                                buttonConsent.innerHTML = Config.lang.en.consent_btn_accept
                                 cc_button.appendChild(buttonConsent)
         }
             
