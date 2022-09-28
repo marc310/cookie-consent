@@ -429,6 +429,11 @@ body {
   background: none;
 }
 
+
+/* share-this overlay to hide consent */
 .st-cmp-settings{
+  display: none!important;
+}
+#st-cmp-v2 .st-cmp-app {
   display: none!important;
 }

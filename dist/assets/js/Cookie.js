@@ -25,7 +25,7 @@ class Cookie {
     constructor(){
         //-------------------------------------------------------
         // Default Cookies Settings
-        const Default = {
+        this.Default = {
             name: 'Cookie Consent',
             url: 'https://github.com/marc310/cookie-consent',
             description: 'Cookie notice bars are not enough!',
@@ -34,8 +34,9 @@ class Cookie {
             iconPreferences: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/img/cookie_1f36a.png',
             cssCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/css/cookies.css',
             jsCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/js/cookies.core.js',
-            cssLocal: './assets/css/cookies.css',
-            jsLocal: './assets/js/cookies.core.js',
+            base_local: './assets/',
+            cssLocal: 'css/cookies.css',
+            jsLocal: 'js/cookies.core.js',
             expire: 15,
             consent: false,
             useJsCDN: false,
@@ -47,16 +48,17 @@ class Cookie {
         // Cookies Script Settings
         this.settings = {
             // General settings
-            name : Config.Cookies.preferences.name === undefined ? Default.name : Config.Cookies.preferences.name,
-            description: Config.Cookies.preferences.description === undefined ? Default.description : Config.Cookies.preferences.description,
-            url: Config.Cookies.preferences.website === undefined ? Default.url : Config.Cookies.preferences.website,
-            privacyPage: Config.Cookies.preferences.privacyPage === undefined ? Default.privacy : Config.Cookies.preferences.privacyPage,
-            termsPage: Config.Cookies.preferences.termsPage === undefined ? Default.terms : Config.Cookies.preferences.termsPage,
-            expire: Config.Cookies.preferences.expire === undefined ? Default.expire : Config.Cookies.preferences.expire,
-            defaultConsent: Config.Cookies.preferences.consent === undefined ? Default.consent : Config.Cookies.preferences.consent,
-            useJsCDN: Config.Cookies.preferences.useJsCDN === undefined ? Default.useJsCDN : Config.Cookies.preferences.useJsCDN,
-            useCssCDN: Config.Cookies.preferences.useCssCDN === undefined ? Default.useCssCDN : Config.Cookies.preferences.useCssCDN,
-            iconPreferences: Config.Cookies.preferences.iconPreferences === undefined ? Default.iconPreferences : Config.Cookies.preferences.iconPreferences,
+            name : Config.Cookies.preferences.name === undefined ? this.Default.name : Config.Cookies.preferences.name,
+            description: Config.Cookies.preferences.description === undefined ? this.Default.description : Config.Cookies.preferences.description,
+            url: Config.Cookies.preferences.website === undefined ? this.Default.url : Config.Cookies.preferences.website,
+            privacyPage: Config.Cookies.preferences.privacyPage === undefined ? this.Default.privacy : Config.Cookies.preferences.privacyPage,
+            termsPage: Config.Cookies.preferences.termsPage === undefined ? this.Default.terms : Config.Cookies.preferences.termsPage,
+            expire: Config.Cookies.preferences.expire === undefined ? this.Default.expire : Config.Cookies.preferences.expire,
+            defaultConsent: Config.Cookies.preferences.consent === undefined ? this.Default.consent : Config.Cookies.preferences.consent,
+            useJsCDN: Config.Cookies.preferences.useJsCDN === undefined ? this.Default.useJsCDN : Config.Cookies.preferences.useJsCDN,
+            useCssCDN: Config.Cookies.preferences.useCssCDN === undefined ? this.Default.useCssCDN : Config.Cookies.preferences.useCssCDN,
+            iconPreferences: Config.Cookies.preferences.iconPreferences === undefined ? this.Default.iconPreferences : Config.Cookies.preferences.iconPreferences,
+            base_local: Config.Cookies.preferences.base_local === undefined ? this.Default.base_local : Config.Cookies.preferences.base_local,
             // Consent settings
             consent : {
                 version: '1.1',
@@ -67,16 +69,15 @@ class Cookie {
             }
         }
         //-------------------------------------------------------
-        
         //-------------------------------------------------------
         this.w3orgSvg = 'http://www.w3.org/2000/svg'
-        this.appJavascript = 'application/javascript'
+        this.appJavascript = 'text/javascript'
         this.defaultConsentName = this.settings.name + '_consent'
         this.defaultCookieName = '_' + this.settings.name.toLowerCase()
         this.configCookies = Object.entries(Config.Cookies.template)
         //-------------------------------------------------------
 
-        // this.init()
+        this.init()
 
     }    
     // constructor end
@@ -110,7 +111,8 @@ class Cookie {
                     this.create.HeadScript(this.appJavascript, Config.Cookies.template[tag].src)
                 } else if (script === false) {
                     // precisa passar um target
-                    this.create.TargetScript(this.appJavascript, Config.Cookies.template[tag].src, tag)
+                    let target = Config.Cookies.template[tag].target === undefined ? tag + '_script' : Config.Cookies.template[tag].target
+                    this.create.TargetScript(this.appJavascript, Config.Cookies.template[tag].src, target)
                 } 
                 if (script === null) {
                     // null scripts wanted true = application/javascript
@@ -167,7 +169,7 @@ class Cookie {
         },
         
         TargetScript: (type, url, target) => {
-            let targetLink = '#' + target + '_script'
+            let targetLink = '#' + target
             const div = document.querySelector(targetLink);
             if (div){
                 let script = this.create.Element('script', {
@@ -286,6 +288,7 @@ class Cookie {
             }
         },
 
+        defaultCookieName: '_' + (Config.Cookies.preferences.name === undefined ? Default.name : Config.Cookies.preferences.name).toLowerCase(),
         //-------------------------------------------------------
         // Cookies Manager
         getCookie: function (c) {
@@ -307,6 +310,7 @@ class Cookie {
             return unescape(b.substring(d + e.length, a))
         },
         localCookies : function () {
+            // console.log(this.defaultCookieName)
             let cookieName = '_' + (Config.Cookies.preferences.name === undefined ? Default.name : Config.Cookies.preferences.name).toLowerCase()
             let cookies = JSON.parse(this.getCookie(cookieName))
             return cookies
@@ -406,30 +410,28 @@ class Cookie {
     
         clearCookies: () => {
             this.manage.deleteCookie(this.defaultCookieName)
-            debugger
             this.consent.checkBannedList()
         },
     
         validate: () => {
-            let name = Config.Cookies.preferences.name === undefined ? Default.name : Config.Cookies.preferences.name
             let configCookies = Object.entries(Config.Cookies.template)
             let arrayCookies = this.manage.arrayCookies()
             let localCookies = this.manage.localCookies()
             if(arrayCookies.length != configCookies.length){
-                this.manage.deleteCookie(name)
+                this.manage.deleteCookie(this.defaultCookieName)
             }
             if (localCookies) {
                 let version = this.settings.consent.version != localCookies.version ? true : false
                 // retorna true se for diferente
                 if (version === true) {
-                    this.manage.deleteCookie(name)
+                    this.manage.deleteCookie(this.defaultCookieName)
                 }
             }
         },
         //-------------------------------------------------------
         // set consent
         set: (key) => {
-            console.log(this.settings.expire)
+            // console.log(this.settings.expire)
             if (key == false) {
                 this.manage.deleteCookie(this.defaultCookieName)
             } else {
@@ -880,10 +882,12 @@ class Cookie {
                     this.manage.setLocalStorage(this.defaultConsentName, 0) // declined
                     setTimeout(() => {
                         window.location.reload()
-                    }, "1000") 
-                    return false
+                    }, "1500") 
                 }
                 if(form === true) {
+                    this.manage.clearLocal()
+                    this.manage.clearSession()
+                    this.consent.clearCookies()
                     for (let i = 0; i < preferences.length; i++){
                         this.setConsentByForm(preferences)
                         this.manage.setLocalStorage(this.defaultConsentName, 1 ) // accepted
@@ -891,26 +895,25 @@ class Cookie {
                     }
                     setTimeout(() => {
                         window.location.reload()
-                    }, "1000") 
+                    }, "1500") 
                 } else if (preferences.length === this.configCookies.length) {
                     // user accepted all consents or selected all cookies
                     this.setAllConsent(true)
                     this.manage.setLocalStorage(this.defaultConsentName, 1 ) // accepted
-
                     this.consent.set(JSON.stringify(this.settings.consent))
                     setTimeout(() => {
                         window.location.reload()
-                    }, "1000") 
+                    }, "1500") 
                 }
             } else if (action === 'deleteCookie') {
                 Consent.clearCookies()
                 setAllConsent(false)
                 // this.settings.consent.value = false
-                Consent.set(JSON.stringify(this.settings.consent))
-                manage.setLocalStorage(this.defaultConsentName, 0) // declined
+                this.consent.set(JSON.stringify(this.settings.consent))
+                this.manage.setLocalStorage(this.defaultConsentName, 0) // declined
                 setTimeout(() => {
                     window.location.reload()
-                }, "1000") 
+                }, "1500") 
             }
         }
 
@@ -933,7 +936,10 @@ class Cookie {
     
     
     init = () => { 
-        this.render.CookieSettingsElements() 
+        this.render.CookieSettingsElements()
+        let css_file = this.settings.useCssCDN === true ? this.Default.cssCDN : this.Default.base_local + this.Default.cssLocal
+        this.create.CSS(css_file)
+
         //-------------------------------------------------------
         // Objects
         //-------------------------------------------------------
@@ -1049,9 +1055,10 @@ class Cookie {
         })
 
         // const name = Config.Cookies.preferences.name === undefined ? Default.name : Config.Cookies.preferences.name
-        const c = this.manage.getCookie(Config.Cookies.preferences.name === undefined ? Default.name : Config.Cookies.preferences.name)
+        const c = this.manage.getCookie(this.defaultCookieName)
+        
         close.addEventListener("click", function () {
-            if (!this.c){
+            if (!c){
                 // this.consentBarShow() // *(deprecated)
                 cookieConsentBar.classList.remove('collapse')
                 cookieWrapper.style.display = "none";
@@ -1100,7 +1107,7 @@ class Cookie {
 }
 
 Cookie = new Cookie()
-Cookie.init()
+// Cookie.init()
 
 // console.log(Config.Cookies.template)
 // Config.setup()

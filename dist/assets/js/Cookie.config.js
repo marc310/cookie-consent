@@ -51,6 +51,7 @@ export const Cookies = {
             src: "https://widget.gleamjs.io/e.js",
             description: 'These cookies allow us or our third-party giveaway providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
             script: false, // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
+            target: 'giveaway_section'
         }
 
     // templates end
@@ -74,7 +75,7 @@ export const Cookies = {
         privacy: 'privacy.html',
 
         useJsCDN: false,
-        
+
         useCssCDN: false,
 
     },
