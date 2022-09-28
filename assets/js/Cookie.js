@@ -482,8 +482,10 @@ class Cookie {
             let arrayCookies = this.manage.arrayCookies()
             let localCookies = this.manage.localCookies()
             let localStorageSettings = this.manage.getLocalStorage(this.defaultConsentName) // accepted
-            if(arrayCookies.length != configCookies.length){
-                this.manage.deleteCookie(this.defaultCookieName)
+            if(arrayCookies){
+                if(arrayCookies.length != configCookies.length){
+                    this.manage.deleteCookie(this.defaultCookieName)
+                }
             }
             if(localCookies === null || !localCookies.cookies.analytics || localCookies.cookies.analytics.wanted != true){
                 this.consent.searchGtag()
@@ -496,7 +498,7 @@ class Cookie {
                 }
             } else if (!localCookies && localStorageSettings){
                 this.consent.searchGtag()
-                this.manage.deleteLocalStorage(this.defaultConsentName) // accepted
+                // this.manage.deleteLocalStorage(this.defaultConsentName) // accepted
             }
             for(let i = 0; i < arrayCookies.length; i++){
                 let localCookieName = arrayCookies[i][0]
@@ -530,6 +532,50 @@ class Cookie {
             // pelo id ex: document.getElementById('giveaway').checked = true
             // pra diferenciar setar os ids como check_'nome'
             // pegar o consent e gerar o form de opções
+            this.setSelectors = function () {
+                let arrayCookies = this.manage.arrayCookies()
+                let localCookies = this.manage.localCookies()
+                for (let i = 0; i < arrayCookies.length; i++) {
+                    let key = arrayCookies[i][0]
+                    let wanted = localCookies.cookies[key].wanted === undefined ? core.Default.consent : localCookies.cookies[key].wanted
+                    let input = document.getElementById('chk_' + key)
+                    let status = document.getElementById(key + '_status')
+
+                    status.innerHTML = wanted === true ? Config.lang.en.default_statusActive : Config.lang.en.default_statusInactive
+                    if(wanted) {
+                        status.classList.add('class', 'success')
+                        status.classList.remove('class', 'default')
+                    }
+                    if(input) { 
+                        input.checked = wanted
+                    }
+                    if (wanted === true) {
+                        this.create.Script(this.configCookies[i])
+                    }
+                }
+            }
+
+            this.setSelectorsDefault = function () {
+                for (let i = 0; i < this.configCookies.length; i++) {
+                    let key = this.configCookies[i][0]
+                    let wanted = Config.Cookies.template[key].wanted === undefined ? this.settings.defaultConsent : Config.Cookies.template[key].wanted
+                    let input = document.getElementById('chk_' + key)
+                    let status = document.getElementById(key + '_status')
+                    status.innerHTML = wanted === true ? Config.lang.en.default_statusActive : Config.lang.en.default_statusInactive
+                    if(input) { 
+                        input.checked = wanted
+                    }
+                    if (wanted === true) {
+                        // TODO.. by default
+                        // error to 
+                        
+                        status.classList.add('class', 'success')
+                        status.classList.remove('class', 'default')
+                        this.create.Script(this.configCookies[i])
+                    }
+                }
+            }
+
             if (!this.manage.getLocalStorage(this.defaultConsentName)){
                 // console.log('cookie consent nao existe') entao cria o script por padrao
                 // default setup when user not accepted or declined
@@ -539,18 +585,22 @@ class Cookie {
                     // for( let i = 0; i < this.configCookies.length; i++){
                     // }
                     // all inputs checked by default when user not consented yet
-                    
-                    for (let i = 0; i < this.configCookies.length; i++) {
-                        let key = this.configCookies[i][0]
-                        let wanted = Config.Cookies.template[key].wanted === undefined ? this.settings.defaultConsent : Config.Cookies.template[key].wanted
-                        let input = document.getElementById('chk_' + key)
-                        if(input) { 
-                            input.checked = wanted
-                        }
-                        if (wanted === true) {
-                            create.Script(this.configCookies[i])
-                        }
-                    }
+                    this.setSelectorsDefault()
+                    // for (let i = 0; i < this.configCookies.length; i++) {
+                    //     let key = this.configCookies[i][0]
+                    //     let wanted = Config.Cookies.template[key].wanted === undefined ? this.settings.defaultConsent : Config.Cookies.template[key].wanted
+                    //     let input = document.getElementById('chk_' + key)
+                    //     if(input) { 
+                    //         input.checked = wanted
+                    //     }
+                    //     if (wanted === true) {
+                    //         // TODO.. by default
+                    //         // error to 
+                    //         this.create.Script(this.configCookies[i])
+                    //     }
+                    // }
+
+
                 }
 
             } else {
@@ -586,31 +636,30 @@ class Cookie {
                     }
                 }else {
                     // consent = true , consent já configurado entao deve-se verificar quais as configurações atraves do atributo wanted
-                    debugger
                     this.consent.validate()
                     this.consent.checkBannedList()
-                    let arrayCookies = this.manage.arrayCookies()
-                    let localCookies = this.manage.localCookies()
-                    for (let i = 0; i < arrayCookies.length; i++) {
-                        let key = arrayCookies[i][0]
-                        let wanted = localCookies.cookies[key].wanted === undefined ? core.Default.consent : localCookies.cookies[key].wanted
-                        let input = document.getElementById('chk_' + key)
-                        let status = document.getElementById(key + '_status')
+                    this.setSelectors()
+                //     let arrayCookies = this.manage.arrayCookies()
+                //     let localCookies = this.manage.localCookies()
+                //     for (let i = 0; i < arrayCookies.length; i++) {
+                //         let key = arrayCookies[i][0]
+                //         let wanted = localCookies.cookies[key].wanted === undefined ? core.Default.consent : localCookies.cookies[key].wanted
+                //         let input = document.getElementById('chk_' + key)
+                //         let status = document.getElementById(key + '_status')
 
-                        status.innerHTML = wanted === true ? Config.lang.en.default_statusActive : Config.lang.en.default_statusInactive
-                        if(wanted) {
-                            status.classList.add('class', 'success')
-                            status.classList.remove('class', 'default')
-                        }
-
-                        if(input) { 
-                            input.checked = wanted
-                        }
-                        if (wanted === true) {
-                            this.create.Script(this.configCookies[i])
-                        }
-                    }
-                }
+                //         status.innerHTML = wanted === true ? Config.lang.en.default_statusActive : Config.lang.en.default_statusInactive
+                //         if(wanted) {
+                //             status.classList.add('class', 'success')
+                //             status.classList.remove('class', 'default')
+                //         }
+                //         if(input) { 
+                //             input.checked = wanted
+                //         }
+                //         if (wanted === true) {
+                //             this.create.Script(this.configCookies[i])
+                //         }
+                //     }
+                // }
                 // floaterVisible()
                 // seta os inputs baseado nas configurações do cookie salvas
                 // for (const [key, value] of arrayCookies) {
@@ -622,7 +671,7 @@ class Cookie {
                 //     if (input){
                 //         input.checked = wanted == true ? wanted : false
                 //     }
-                // }
+                }
                 
             }
             // return cookie
@@ -824,6 +873,16 @@ class Cookie {
                                                 divScriptName.appendChild(span_li)
                                     // checkbox
                                     // TODO.. incluir botao badge pra identificar o status
+                                    
+                                    // let status = this.settings.defaultConsent === true ? Config.lang.en.default_statusActive : Config.lang.en.default_statusInactive
+                                    // let statusClass = 'status ' + (this.settings.defaultConsent === true ? 'success' : 'default')
+                                    
+                                    // let bage = this.render.badge(status, statusClass)
+                                    // console.log(this.defaultConsentName)
+                                    
+                                    // debugger
+
+
                                     let status = this.render.badge(Config.lang.en.default_statusInactive, 'status default')
                                     status.setAttribute('id', cookie_name+'_status')
                                     cookie_li.appendChild(status)
@@ -971,6 +1030,7 @@ class Cookie {
                     this.manage.clearSession()
                     this.consent.clearCookies()
                     this.manage.setLocalStorage(this.defaultConsentName, 0) // declined
+
                     setTimeout(() => {
                         window.location.reload()
                     }, "1500") 
@@ -1205,11 +1265,8 @@ class Cookie {
         let resizeObserver = new ResizeObserver(() => {
             let tab = document.getElementsByClassName('tab_consent_form')[0]
             let newSize = (window.innerHeight - defaultSizeReduce) + 'px'
-            tab.style.maxHeight = newSize
             // Set the current height and width
-            // to the element
-            console.log(window.innerHeight)
-           
+            tab.style.maxHeight = newSize
         });
            
         // Add a listener to body

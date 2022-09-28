@@ -87,6 +87,8 @@ export const Cookies = {
 
         useCssCDN: false,
 
+        consent: true,
+
     },
     // Preferences end
     //-------------------------------------------------------
@@ -118,7 +120,7 @@ export const bannedList = {
     
 
 //-------------------------------------------------------
-// Lang Package
+// Language Package
 export const lang = {
     en: {
     //-------------------------------------------------------
