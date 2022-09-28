@@ -1,13 +1,3 @@
-
-/* ************************************************************
-:: Project Name: Cookie Consent Script
-:: Project Author Name: Marcelo Motta
-:: Project Author URI: https://marcelomotta.com
-:: Project URI: https://github.com/marc310/cookie-consent
-:: Version: 1.1.0
-:: Created: 22 Set 2022
-************************************************************  */
-
 @import url("https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&display=swap");
 * {
   -webkit-box-sizing: border-box;
@@ -123,7 +113,7 @@ body {
 
 .cookie .front .learn_more {
   display: inline-block;
-  color: var(--green);
+  color: #243bc5;
   font-size: 16px;
   line-height: 26px;
 }
@@ -231,7 +221,7 @@ body {
 
 .cookie .back_footer input {
   padding: 15px 38px;
-  background-color: var(--green);
+  background-color: #273240;
   color: white;
   border: none;
   border-radius: 5px;
@@ -254,7 +244,7 @@ body {
   left: 32px;
   -webkit-transition-duration: 350ms;
           transition-duration: 350ms;
-  background-color: var(--green);
+  background-color: #243bc5;
 }
 
 .custom_checkbox span {
@@ -412,8 +402,8 @@ body {
   font-size: 14px;
   border: 0;
   padding: 10px 10px;
-  color: white;
-  background-color: var(--green);
+  color: black;
+  background-color: #fff;
   border-radius: .365em;
   cursor: pointer;
 }
@@ -429,11 +419,6 @@ body {
   background: none;
 }
 
-
-/* share-this overlay to hide consent */
 .st-cmp-settings{
-  display: none!important;
-}
-#st-cmp-v2 .st-cmp-app {
   display: none!important;
 }
