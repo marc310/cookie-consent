@@ -112,7 +112,8 @@ class Cookie {
                 } else if (script === false) {
                     // precisa passar um target
                     let target = Config.Cookies.template[tag].target === undefined ? tag + '_script' : Config.Cookies.template[tag].target
-                    this.create.TargetScript(this.appJavascript, Config.Cookies.template[tag].src, target)
+                    let btn = Config.Cookies.template[tag].button === undefined ? false : Config.Cookies.template[tag].button
+                    this.create.TargetScript(this.appJavascript, Config.Cookies.template[tag].src, target, btn)
                 } 
                 if (script === null) {
                     // null scripts wanted true = application/javascript
@@ -168,14 +169,17 @@ class Cookie {
             document.head.prepend(script);
         },
         
-        TargetScript: (type, url, target) => {
+        TargetScript: (type, url, target, button = false) => {
             let targetLink = '#' + target
+            let btn = button === false ? 'empty' : button
             const div = document.querySelector(targetLink);
             if (div){
                 let script = this.create.Element('script', {
                     type: type,
                     src: url,
+                    async : true,
                 })
+                div.innerHTML = btn;
                 div.appendChild(script);
             } else {
                 return false
@@ -386,6 +390,7 @@ class Cookie {
             for(let i=0; i<c.length ;i++){
                 if(c[i].match('_gat')) {
                     let gtag = c[i].split('=')[0]
+                    this.manage.deleteCookie(gtag)
                     return gtag
                 }
             }
@@ -411,12 +416,16 @@ class Cookie {
         clearCookies: () => {
             this.manage.deleteCookie(this.defaultCookieName)
             this.consent.checkBannedList()
+            this.consent.searchGtag()
         },
     
         validate: () => {
             let configCookies = Object.entries(Config.Cookies.template)
             let arrayCookies = this.manage.arrayCookies()
             let localCookies = this.manage.localCookies()
+            if(localCookies === null || !localCookies.cookies.analytics || localCookies.cookies.analytics.wanted != true){
+                this.consent.searchGtag()
+            }
             if(arrayCookies.length != configCookies.length){
                 this.manage.deleteCookie(this.defaultCookieName)
             }
@@ -722,7 +731,9 @@ class Cookie {
                                 let cookie_name = this.configCookies[i][0]
                                 let description_cookie = this.configCookies[i][1].description
                                 // TODO.. adjust name title
-                                let title = cookie_name == 'giveaway' ? 'Third-Party Cookies' : cookie_name + ' Cookies'
+                                let title = this.configCookies[i][1].title
+                                // debugger
+                                // let title = cookie_name == 'giveaway' ? 'Third-Party Cookies' : cookie_name + ' Cookies'
                                 let cookie_li = document.createElement('li')
                                 cookie_options_tab.appendChild(cookie_li)
                                     let iconPlus = this.create.Element('i', { class: 'fas fa-plus' })
@@ -885,9 +896,9 @@ class Cookie {
                     }, "1500") 
                 }
                 if(form === true) {
-                    this.manage.clearLocal()
-                    this.manage.clearSession()
-                    this.consent.clearCookies()
+                    // this.manage.clearLocal()
+                    // this.manage.clearSession()
+                    // this.consent.clearCookies()
                     for (let i = 0; i < preferences.length; i++){
                         this.setConsentByForm(preferences)
                         this.manage.setLocalStorage(this.defaultConsentName, 1 ) // accepted
@@ -939,6 +950,8 @@ class Cookie {
         this.render.CookieSettingsElements()
         let css_file = this.settings.useCssCDN === true ? this.Default.cssCDN : this.Default.base_local + this.Default.cssLocal
         this.create.CSS(css_file)
+        this.consent.validate()
+        this.consent.checkConfig()
 
         //-------------------------------------------------------
         // Objects
@@ -977,21 +990,23 @@ class Cookie {
             const input = element.getElementsByTagName("input")[0];
             const badge = element.getElementsByClassName("status")[0];
             const data = element.nextElementSibling;
-            if(input.checked === true) {
-                badge.classList.add('success')
-                badge.classList.remove('default')
-                badge.innerHTML = Config.lang.en.default_statusActive
-            } else {
-                badge.classList.add('default')
-                badge.classList.remove('success')
-                badge.innerHTML = Config.lang.en.default_statusInactive
-            }
             if (iEl.className == "far fa-minus") {
                 iEl.classList.value = "fas fa-plus";
             } else {
                 iEl.classList.value = "far fa-minus";
             }
             data.classList.toggle("active");
+            if(input != undefined) {
+                if(input.checked === true) {
+                    badge.classList.add('success')
+                    badge.classList.remove('default')
+                    badge.innerHTML = Config.lang.en.default_statusActive
+                } else {
+                    badge.classList.add('default')
+                    badge.classList.remove('success')
+                    badge.innerHTML = Config.lang.en.default_statusInactive
+                }
+            }
         });
         }
         
@@ -1023,9 +1038,6 @@ class Cookie {
         //     this.consentBarHide()
         //     back.style.display = "flex";
         // }
-
-        this.consent.validate()
-        this.consent.checkConfig()
 
         //-------------------------------------------------------
         // Event Listeners

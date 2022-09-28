@@ -38,7 +38,7 @@ export const Cookies = {
         marketing: {
             title: 'Share This',
             category: 'Marketing',
-            src: "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop",
+            src: 'https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop',
             description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
             script: true, // true means the script will be created in the DOM and loaded on header
         },
@@ -48,10 +48,11 @@ export const Cookies = {
         giveaway: {
             title: 'Giveaway',
             category: 'Marketing',
-            src: "https://widget.gleamjs.io/e.js",
+            target: 'giveaway_section',
+            src: 'https://widget.gleamjs.io/e.js',
+            button: '<a class="e-widget no-button" href="https://gleam.io/smhaJ/suprise-giveaway" rel="nofollow">Suprise Giveaway</a>',
             description: 'These cookies allow us or our third-party giveaway providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
             script: false, // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
-            target: 'giveaway_section'
         }
 
     // templates end
