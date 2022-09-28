@@ -36,7 +36,7 @@ export const Cookies = {
         //-------------------------------------------------------
 
         marketing: {
-            title: 'Share This',
+            title: 'Share-This Cookies',
             category: 'Marketing',
             src: 'https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop',
             description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
@@ -46,7 +46,7 @@ export const Cookies = {
         //-------------------------------------------------------
 
         giveaway: {
-            title: 'Giveaway',
+            title: 'Giveaway Third-party-cookies',
             category: 'Marketing',
             target: 'giveaway_section',
             src: 'https://widget.gleamjs.io/e.js',

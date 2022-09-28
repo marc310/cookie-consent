@@ -5,7 +5,9 @@
 
 Optional ways, using local file or include script using CDN to get the latest and updated version the core script will generate this file don't need setup this file on header
 just setup on Config.Cookies.preferences we have two new variables can be set as useJsCDN: true/false and useCssCDN: true/false,
-CDN: https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/js/cookies.core.js
+CDN: https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/js/Cookie.js
+
+config file should be located at js folder '/assets/js/'
 
 the core script will include also the css file https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/css/cookies.css don't need setup this
 
@@ -21,63 +23,88 @@ In this Object take attention at the script specification
 
 > the script null && ga_code || fb_code || sc_project for statcounter: this mean the script should construct the analytics or facebook script code and you just need give the user_id like on example...
 
-> 
-    const Config = {
+> new option target included, this target should be given or not, if not provide the target the script will search for template.name + '_script', if the target div not provide the script will not be loaded
 
-        Cookies : {
-            
-            //-------------------------------------------------------
-            // Cookies Template Configuration
-            template: {
-                analytics: {
-                    title: 'Google Analytics',
-                    category: 'Analytics',
-                    ga_code: 'UA-145014090-1',
-                    description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-                    script: null, // script null means the script not will be loaded, and the code will search on DOM by the cookie name
-                    // wanted: true
-                    // scriptTag: true,
-                },
-                statcounter: {
-                    title: 'Stat Counter',
-                    category: 'Performance',
-                    sc_project: '12799177',
-                    sc_security: 'cef97f6c',
-                    sc_invisible: 0,
-                    sc_text: 3,
-                    description: 'tracking cookies test with statcounter',
-                    script: null,
-                },
-                marketing: {
-                    title: 'Share This',
-                    category: 'Marketing',
-                    src: "https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop",
-                    description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-                    script: true, // true means the script will be created in the DOM and loaded on header
-                },
-                giveaway: {
-                    title: 'Giveaway',
-                    category: 'Marketing',
-                    src: "https://widget.gleamjs.io/e.js",
-                    description: 'These cookies allow us or our third-party giveaway providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-                    script: false, // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
-                }
-            },
-            
-            //-------------------------------------------------------
-            // Preferences Setup
-            preferences: {
-                name: 'Kess',
-                website: 'https://kessgame.com/',
-                expire: 15,
-                description: 'Cookie notice bars are not enough!',
-                terms: 'terms.html',
-                privacy: 'privacy.html',
-                useJsCDN: false,
-                useCssCDN: false,
-            },
+
+> 
+    //-------------------------------------------------------
+    // Starting Cookies Template Configuration
+    template: {
+    //-------------------------------------------------------
+    // start templates below
+
+        analytics: {
+            title: 'Google Analytics',
+            category: 'Analytics',
+            ga_code: 'UA-145014090-1',
+            description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
+            script: null, // script null means the script not will be loaded, and the code will search on DOM by the cookie name
+            // wanted: true
+            // scriptTag: true,
         },
-    }
+
+        //-------------------------------------------------------
+
+        statcounter: {
+            title: 'Stat Counter',
+            category: 'Performance',
+            sc_project: '12799177',
+            sc_security: 'cef97f6c',
+            sc_invisible: 0,
+            sc_text: 3,
+            description: 'tracking cookies test with statcounter',
+            script: null,
+        },
+
+        //-------------------------------------------------------
+
+        marketing: {
+            title: 'Share-This Cookies',
+            category: 'Marketing',
+            src: 'https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop',
+            description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
+            script: true, // true means the script will be created in the DOM and loaded on header
+        },
+        
+        //-------------------------------------------------------
+
+        giveaway: {
+            title: 'Giveaway Third-party-cookies',
+            category: 'Marketing',
+            target: 'giveaway_section',
+            src: 'https://widget.gleamjs.io/e.js',
+            button: '<a class="e-widget no-button" href="https://gleam.io/smhaJ/suprise-giveaway" rel="nofollow">Suprise Giveaway</a>',
+            description: 'These cookies allow us or our third-party giveaway providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
+            script: false, // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
+        }
+
+    // templates end
+    //-------------------------------------------------------
+    },
+    
+    //-------------------------------------------------------
+    // Preferences Setup
+    preferences: {
+
+        name: 'Kess',
+
+        website: 'https://kessgame.com/',
+
+        expire: 15,
+
+        description: 'Cookie notice bars are not enough!',
+
+        terms: 'terms.html',
+
+        privacy: 'privacy.html',
+
+        useJsCDN: false,
+
+        useCssCDN: false,
+
+    },
+    // Preferences end
+    //-------------------------------------------------------
 
 this setting change everything in how the script will be loaded
 let the script config call the core.js just include this simple function at the bottom
