@@ -496,7 +496,15 @@ class Cookie {
                 if (version === true) {
                     this.manage.deleteCookie(this.defaultCookieName)
                 }
-            } else if (!localCookies && localStorageSettings){
+            // TODO.. prevent lost consent
+            } 
+            if (!localStorageSettings && localCookies){
+                this.consent.searchGtag()
+                // delete cookie if not local storage consent set
+                this.consent.clearCookies()
+                debugger
+            } 
+            if (!localCookies && localStorageSettings){
                 this.consent.searchGtag()
                 // this.manage.deleteLocalStorage(this.defaultConsentName) // accepted
             }
