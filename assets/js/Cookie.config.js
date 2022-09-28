@@ -15,7 +15,9 @@ export const Cookies = {
             category: 'Analytics',
             ga_code: 'UA-145014090-1',
             description: 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-            script: null, // script null means the script not will be loaded, and the code will search on DOM by the cookie name
+            // new meaning: to load an specific script model **check scriptTypeList
+            // old null
+            script: 'analytics', // script null means the script not will be loaded, and the code will search on DOM by the cookie name
             // wanted: true
             // scriptTag: true,
         },
@@ -30,7 +32,9 @@ export const Cookies = {
             sc_invisible: 0,
             sc_text: 3,
             description: 'tracking cookies test with statcounter',
-            script: null,
+            // new meaning: to load an specific script model **check scriptTypeList
+            // old null
+            script: 'statcounter',
         },
 
         //-------------------------------------------------------
@@ -40,7 +44,9 @@ export const Cookies = {
             category: 'Marketing',
             src: 'https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop',
             description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-            script: true, // true means the script will be created in the DOM and loaded on header
+            // new meaning: to load script on header should call 'head'
+            // old true
+            script: 'head', // true means the script will be created in the DOM and loaded on header
         },
         
         //-------------------------------------------------------
@@ -52,7 +58,9 @@ export const Cookies = {
             src: 'https://widget.gleamjs.io/e.js',
             button: '<a class="e-widget no-button" href="https://gleam.io/smhaJ/suprise-giveaway" rel="nofollow">Suprise Giveaway</a>',
             description: 'These cookies allow us or our third-party giveaway providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
-            script: false, // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
+            // new meaning: to load script on target should call 'custom'
+            // old false
+            script: 'custom', // that means the script will be loaded on target to call this target should use the id on element named with sufix cookie.name + '_script' ex: giveaway_script
         }
 
     // templates end

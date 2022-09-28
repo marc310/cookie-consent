@@ -98,6 +98,7 @@ class Cookie {
         
             return element
         },
+
         Script: (key) => {
             // debugger
             let tag = key[0]
@@ -107,42 +108,99 @@ class Cookie {
             if(wanted) {
                 // todos os wanted devem dar load no script
                 // verifica o script true para gerar no header, false para gerar num target, entao é pedido um novo parametro node* , e null para nao carregar nenhum script, retorna falso
-                if (script === true) {
-                    this.create.HeadScript(this.appJavascript, Config.Cookies.template[tag].src)
-                } else if (script === false) {
-                    // precisa passar um target
-                    let target = Config.Cookies.template[tag].target === undefined ? tag + '_script' : Config.Cookies.template[tag].target
-                    let btn = Config.Cookies.template[tag].button === undefined ? false : Config.Cookies.template[tag].button
-                    this.create.TargetScript(this.appJavascript, Config.Cookies.template[tag].src, target, btn)
-                } 
-                if (script === null) {
-                    // null scripts wanted true = application/javascript
-                    let ConfigPath = Config.Cookies.template[tag]
-                    //
-                    // lets decide what kind of script should be generated
-                    // TODO... refatorar esse trecho pra um for rodando em um array contendo o tipo e o codigo pra chamar a função especifica
-                    if(ConfigPath.ga_code){
+                let ConfigPath = Config.Cookies.template[tag]
+                let scriptType = (ConfigPath.script === undefined || ConfigPath.script.toLowerCase() === 'head') ? false : ConfigPath.script.toLowerCase()
+                switch (scriptType) {
+                    case "head" :
+                        this.create.HeadScript(this.appJavascript, Config.Cookies.template[tag].src)
+                        break;
+                    case "custom" :
+                        let target = Config.Cookies.template[tag].target === undefined ? tag + '_script' : Config.Cookies.template[tag].target
+                        let btn = Config.Cookies.template[tag].button === undefined ? false : Config.Cookies.template[tag].button
+                        this.create.TargetScript(this.appJavascript, Config.Cookies.template[tag].src, target, btn)
+                        break;
+                    case "analytics" :
                         this.create.Analytics(ConfigPath.ga_code)
-                    } else if (ConfigPath.fb_code) {
+                        break;
+                    case "facebook" :
                         this.create.Facebook(ConfigPath.fb_code)
-                    } else if (ConfigPath.hj_code) {
+                        break;
+                    case "hotjar" :
                         this.create.Hotjar(ConfigPath.hj_code)
-                    }
-                    else if (ConfigPath.sc_project) {
+                        break;
+                    case "statcounter" :
                         let project = ConfigPath.sc_project
                         let security = ConfigPath.sc_security
                         let invisible = ConfigPath.sc_invisible
                         let text = ConfigPath.sc_text
                         this.create.Statcounter(project, security, invisible, text)
-                    }
-                    // else {
-                    //     unblockScript(tag, true)
-                    // }
+                        break;
+                    default :
+                        this.create.HeadScript(this.appJavascript, Config.Cookies.template[tag].src)
+                        break;
                 }
-            } else if (wanted === false && script === null) {
-                let extraTag = Config.Cookies.template[tag].scriptTag === true ? true : false
-                blockScript(tag, extraTag)
-            }
+                
+                // if (script === 'head') {
+                //     this.create.HeadScript(this.appJavascript, Config.Cookies.template[tag].src)
+                // } else if (script === false) {
+                //     // precisa passar um target
+                //     let target = Config.Cookies.template[tag].target === undefined ? tag + '_script' : Config.Cookies.template[tag].target
+                //     let btn = Config.Cookies.template[tag].button === undefined ? false : Config.Cookies.template[tag].button
+                //     this.create.TargetScript(this.appJavascript, Config.Cookies.template[tag].src, target, btn)
+                // } 
+                // if (script != 'custom' || script != 'head') {
+                //     // null scripts wanted true = application/javascript
+                //     let ConfigPath = Config.Cookies.template[tag]
+                //     //
+                //     // lets decide what kind of script should be generated
+                //     // TODO... refatorar esse trecho pra um for rodando em um array contendo o tipo e o codigo pra chamar a função especifica
+                //     let scriptType = ConfigPath.script.toLowerCase()
+                //     console.log(scriptType)
+                    
+                //     switch (scriptType) {
+                //         case "analytics" :
+                //             this.create.Analytics(ConfigPath.ga_code)
+                //             break;
+                //         case "facebook" :
+                //             this.create.Facebook(ConfigPath.fb_code)
+                //             break;
+                //         case "hotjar" :
+                //             this.create.Hotjar(ConfigPath.hj_code)
+                //             break;
+                //         case "statcounter" :
+                //             let project = ConfigPath.sc_project
+                //             let security = ConfigPath.sc_security
+                //             let invisible = ConfigPath.sc_invisible
+                //             let text = ConfigPath.sc_text
+                //             this.create.Statcounter(project, security, invisible, text)
+                //             break;
+                //     }
+
+                //     // debugger
+
+                //     // if(ConfigPath.ga_code){
+                //     //     this.create.Analytics(ConfigPath.ga_code)
+                //     // } else if (ConfigPath.fb_code) {
+                //     //     this.create.Facebook(ConfigPath.fb_code)
+                //     // } else if (ConfigPath.hj_code) {
+                //     //     this.create.Hotjar(ConfigPath.hj_code)
+                //     // }
+                //     // else if (ConfigPath.sc_project) {
+                //     //     let project = ConfigPath.sc_project
+                //     //     let security = ConfigPath.sc_security
+                //     //     let invisible = ConfigPath.sc_invisible
+                //     //     let text = ConfigPath.sc_text
+                //     //     this.create.Statcounter(project, security, invisible, text)
+                //     // }
+                //     // else {
+                //     //     unblockScript(tag, true)
+                //     // }
+                // }
+            } 
+            // else if (wanted === false && script === null) {
+            //     let extraTag = Config.Cookies.template[tag].scriptTag === true ? true : false
+            //     blockScript(tag, extraTag)
+            // }
         },
         
         HeadScript: (type, url) => {
@@ -423,11 +481,12 @@ class Cookie {
             let configCookies = Object.entries(Config.Cookies.template)
             let arrayCookies = this.manage.arrayCookies()
             let localCookies = this.manage.localCookies()
-            if(localCookies === null || !localCookies.cookies.analytics || localCookies.cookies.analytics.wanted != true){
-                this.consent.searchGtag()
-            }
+            let localStorageSettings = this.manage.getLocalStorage(this.defaultConsentName) // accepted
             if(arrayCookies.length != configCookies.length){
                 this.manage.deleteCookie(this.defaultCookieName)
+            }
+            if(localCookies === null || !localCookies.cookies.analytics || localCookies.cookies.analytics.wanted != true){
+                this.consent.searchGtag()
             }
             if (localCookies) {
                 let version = this.settings.consent.version != localCookies.version ? true : false
@@ -435,7 +494,19 @@ class Cookie {
                 if (version === true) {
                     this.manage.deleteCookie(this.defaultCookieName)
                 }
+            } else if (!localCookies && localStorageSettings){
+                this.consent.searchGtag()
+                this.manage.deleteLocalStorage(this.defaultConsentName) // accepted
             }
+            for(let i = 0; i < arrayCookies.length; i++){
+                let localCookieName = arrayCookies[i][0]
+                if(!Config.Cookies.template[localCookieName]){
+                    this.manage.deleteCookie(this.defaultCookieName)
+                    this.manage.deleteLocalStorage(this.defaultConsentName) // accepted
+                    return false
+                }
+            }
+            
         },
         //-------------------------------------------------------
         // set consent
@@ -515,6 +586,8 @@ class Cookie {
                     }
                 }else {
                     // consent = true , consent já configurado entao deve-se verificar quais as configurações atraves do atributo wanted
+                    debugger
+                    this.consent.validate()
                     this.consent.checkBannedList()
                     let arrayCookies = this.manage.arrayCookies()
                     let localCookies = this.manage.localCookies()
@@ -708,7 +781,7 @@ class Cookie {
                         let cookie_options = this.create.Element('form', { class: 'cookie_options' })
                             div_back.appendChild(cookie_options)
                             // generating UL
-                            let cookie_options_tab = this.create.Element('ul', { class: 'tab' })
+                            let cookie_options_tab = this.create.Element('ul', { class: 'tab tab_consent_form' })
                             cookie_options.prepend(cookie_options_tab)
                                 // necessary cookies
                                 let cookie_li = document.createElement('li')
@@ -732,16 +805,23 @@ class Cookie {
                                 let description_cookie = this.configCookies[i][1].description
                                 // TODO.. adjust name title
                                 let title = this.configCookies[i][1].title
+                                let category = this.configCookies[i][1].category
                                 // debugger
                                 // let title = cookie_name == 'giveaway' ? 'Third-Party Cookies' : cookie_name + ' Cookies'
                                 let cookie_li = document.createElement('li')
                                 cookie_options_tab.appendChild(cookie_li)
                                     let iconPlus = this.create.Element('i', { class: 'fas fa-plus' })
                                     cookie_li.appendChild(iconPlus)
-                                    let h2_li = document.createElement('h2')
-                                    // title
-                                    h2_li.innerHTML = this.render.TitleCase(title)
-                                    cookie_li.appendChild(h2_li)
+                                    let divScriptName = this.create.Element('div', { class: '' })
+                                        cookie_li.appendChild(divScriptName)
+                                            // title
+                                            let h2_li = document.createElement('h2')
+                                                h2_li.innerHTML = this.render.TitleCase(title)
+                                                divScriptName.appendChild(h2_li)
+                                            // purposes
+                                            let span_li = document.createElement('small')
+                                                span_li.innerHTML = this.render.TitleCase('Purposes: ' + category)
+                                                divScriptName.appendChild(span_li)
                                     // checkbox
                                     // TODO.. incluir botao badge pra identificar o status
                                     let status = this.render.badge(Config.lang.en.default_statusInactive, 'status default')
@@ -1113,8 +1193,28 @@ class Cookie {
             // this.consentBarShow()
             cookieConsentBar.classList.remove('collapse')
         }
+
+        this.resize()
     }
     //-------------------------------------------------------
+
+    resize = () => {
+        const body = document.getElementsByTagName("body")[0];
+        const defaultSizeReduce = 280
+        // Initialize resize observer object
+        let resizeObserver = new ResizeObserver(() => {
+            let tab = document.getElementsByClassName('tab_consent_form')[0]
+            let newSize = (window.innerHeight - defaultSizeReduce) + 'px'
+            tab.style.maxHeight = newSize
+            // Set the current height and width
+            // to the element
+            console.log(window.innerHeight)
+           
+        });
+           
+        // Add a listener to body
+        resizeObserver.observe(body);
+    }
 
 }
 
