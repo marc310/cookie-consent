@@ -123,7 +123,7 @@ body {
 
 .cookie .front .learn_more {
   display: inline-block;
-  color: #243bc5;
+  color: var(--green);
   font-size: 16px;
   line-height: 26px;
 }
@@ -231,7 +231,7 @@ body {
 
 .cookie .back_footer input {
   padding: 15px 38px;
-  background-color: #273240;
+  background-color: var(--green);
   color: white;
   border: none;
   border-radius: 5px;
@@ -254,7 +254,7 @@ body {
   left: 32px;
   -webkit-transition-duration: 350ms;
           transition-duration: 350ms;
-  background-color: #243bc5;
+  background-color: var(--green);
 }
 
 .custom_checkbox span {
@@ -412,8 +412,8 @@ body {
   font-size: 14px;
   border: 0;
   padding: 10px 10px;
-  color: black;
-  background-color: #fff;
+  color: white;
+  background-color: var(--green);
   border-radius: .365em;
   cursor: pointer;
 }
@@ -429,6 +429,11 @@ body {
   background: none;
 }
 
+
+/* share-this overlay to hide consent */
 .st-cmp-settings{
+  display: none!important;
+}
+#st-cmp-v2 .st-cmp-app {
   display: none!important;
 }
