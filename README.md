@@ -5,7 +5,9 @@
 
 Optional ways, using local file or include script using CDN to get the latest and updated version the core script will generate this file don't need setup this file on header
 just setup on Config.Cookies.preferences we have two new variables can be set as useJsCDN: true/false and useCssCDN: true/false,
-CDN: https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/js/cookies.core.js
+CDN: https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/js/Cookie.js
+
+config file should be located at js folder '/assets/js/'
 
 the core script will include also the css file https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/css/cookies.css don't need setup this
 
