@@ -90,6 +90,10 @@ export const Cookies = {
 
         consent: true,
 
+        // cssIncludes: [
+
+        // ],
+
     },
     // Preferences end
     //-------------------------------------------------------
@@ -130,7 +134,8 @@ export const lang = {
         default_statusActive : 'Active',
     // Form
         consent_bar_message : 'This website uses cookies to ensure you get the best experience on our website.',
-        consent_btn_accept : 'Accept all cookies',
+        consent_btn_accept : 'Accept Cookies',
+        consent_btn_confirm: 'Save my Settings'
     }
 }
 // Lang end

@@ -39,14 +39,15 @@ export const Cookies = {
 
         //-------------------------------------------------------
 
-        marketing: {
+        share_this: {
             title: 'Share-This Cookies',
             category: 'Marketing',
             src: 'https://platform-api.sharethis.com/js/sharethis.js#property=63117cee0b5e930012a9c414&product=sop',
             description: 'These cookies allow us or our Marketing Share-This provider to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
             // new meaning: to load script on header should call 'head'
             // old true
-            script: 'head', // true means the script will be created in the DOM and loaded on header
+            // if this script config not exist will be set by default to create script on header
+            // script: 'head', // true means the script will be created in the DOM and loaded on header
         },
         
         //-------------------------------------------------------
@@ -89,6 +90,10 @@ export const Cookies = {
 
         consent: true,
 
+        // cssIncludes: [
+
+        // ],
+
     },
     // Preferences end
     //-------------------------------------------------------
@@ -127,6 +132,10 @@ export const lang = {
     // General
         default_statusInactive : 'Off',
         default_statusActive : 'Active',
+    // Form
+        consent_bar_message : 'This website uses cookies to ensure you get the best experience on our website.',
+        consent_btn_accept : 'Accept Cookies',
+        consent_btn_confirm: 'Save my Settings'
     }
 }
 // Lang end
