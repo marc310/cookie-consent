@@ -26,8 +26,10 @@ body {
   /* margin: 5px; */
 }
 :root {
-  --green: #019875;
-  --lightGreen: #eaf2d7;
+  --cookie_green: #019875;
+  --cookie_lightGreen: #eaf2d7;
+  --cookie_gray1: #757d96;
+  --cookie_gray2: #d1d8eb;
 }
 
 .material-symbols-outlined {
@@ -132,7 +134,7 @@ body {
 
 .cookie .front .learn_more {
   display: inline-block;
-  color: var(--green);
+  color: var(--cookie_green);
   font-size: 16px;
   line-height: 26px;
 }
@@ -237,8 +239,8 @@ body {
   font-size: 12px;
 }
 .cookie .back .tab.tab_consent_form li .baged.success {
-  color: var(--green);
-  background: var(--lightGreen)
+  color: var(--cookie_green);
+  background: var(--cookie_lightGreen)
 }
 
 .cookie .back_footer {
@@ -247,7 +249,7 @@ body {
 
 .cookie .back_footer input {
   padding: 15px 38px;
-  background-color: var(--green);
+  background-color: var(--cookie_green);
   color: white;
   border: none;
   border-radius: 5px;
@@ -270,7 +272,7 @@ body {
   left: 32px;
   -webkit-transition-duration: 350ms;
           transition-duration: 350ms;
-  background-color: var(--green);
+  background-color: var(--cookie_green);
 }
 
 .custom_checkbox span {
@@ -440,7 +442,7 @@ body {
   border: 0;
   padding: 10px 10px;
   color: white;
-  background-color: var(--green);
+  background-color: var(--cookie_green);
   border-radius: .365em;
   cursor: pointer;
   display: flex;
