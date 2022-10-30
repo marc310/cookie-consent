@@ -74,7 +74,10 @@ class Cookie {
 
         Script: (key) => {
             let tag = key.label
-            let cookieInfo = key.content
+            let cookieInfo = key.content != null ? key.content : ()=>{ 
+                console.log('content not exist') 
+                return false 
+            };
             let wanted = cookieInfo.wanted === undefined ? true : cookieInfo.wanted
             let script = key.script
             if(wanted) {
@@ -449,6 +452,8 @@ class Cookie {
     
         validate: (defaultname, configCookies) => {
             // let configCookies = Object.entries(Config.Cookies.template)
+            
+
             let arrayCookies = this.manage.arrayCookies(defaultname)
             let localCookies = this.manage.localCookies(defaultname)
             let localStorageSettings = this.manage.getLocalStorage(this.defaultConsentName) // accepted
@@ -1078,6 +1083,13 @@ class Cookie {
             this.configCookies = d.template
             //-------------------------------------------------------
         }).then( () => {
+
+            for (let i = 0; i < this.configCookies.length; i++) {
+                if(this.configCookies[i].content === null){ 
+                    console.log('No cookie in use | Error: Cookies consent not configured properly')
+                    return false 
+                }
+            }
 
             this.render.CookieSettingsElements()
     
