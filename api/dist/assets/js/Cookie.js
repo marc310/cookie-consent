@@ -1041,7 +1041,7 @@ class Cookie {
         this.clientData = {
             "code": __code
         }
-        let apiUrl = "http://localhost/develop/clientes/dev/cookies_consent_master/api/cookies/property/code/"
+        let apiUrl = "https://cookies.marcelomotta.com/api/cookies/property/code/"
         let getData = fetch(apiUrl + this.clientData.code);
         getData.then(res => res.json()).then(d => {
             
