@@ -34,15 +34,15 @@ class Cookie {
             terms: 'terms.html',
             privacy: 'privacy.html',
             iconPreferences: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/img/cookie_1f36a.png',
-            cssCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/css/cookies.css',
-            jsCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/js/cookies.core.js',
+            cssCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/v2/assets/css/cookies.css',
+            jsCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/v2/assets/js/Cookie.js',
             base_local: './src/plugins/cookies-consent/dist/',
             cssLocal: 'assets/css/cookies.css',
             jsLocal: 'assets/js/cookies.core.js',
             expire: 15,
             consent: false,
             useJsCDN: false,
-            useCssCDN: false,
+            useCssCDN: true,
             cssIncludes: [
                 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',
             ],
@@ -1038,11 +1038,14 @@ class Cookie {
     //-------------------------------------------------------
     init = () => { 
         
+        // const __code='FCB73330E3226E2';
         this.clientData = {
             "code": __code
         }
+        console.log(this.clientData.__code)
         let apiUrl = "https://cookies.marcelomotta.com/api/cookies/property/code/"
         let getData = fetch(apiUrl + this.clientData.code);
+        
         getData.then(res => res.json()).then(d => {
             
             //-------------------------------------------------------
