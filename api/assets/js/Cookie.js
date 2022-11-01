@@ -11,72 +11,6 @@
 */
 
 //-------------------------------------------------------
-// Config for Cookies Script Setup
-//-------------------------------------------------------
-
-class ConfigSetup {
-    constructor () {
-        this.options()
-    }
-
-    options() {
-
-        this.bannedList = {
-            cookies : [
-                '_gid',
-                '_ga',
-                '_fbp',
-                'euconsent-v2',
-                'pubconsent-v2',
-            ],
-            local : [
-                'sc_medium_source',
-                'statcounter.com/localstorage/'
-            ],
-        },
-
-        this.lang = {
-            en: {
-            //-------------------------------------------------------
-            // General
-                default_statusInactive : 'Off',
-                default_statusActive : 'Active',
-            // Form
-                consent_bar_message : 'This website uses cookies to ensure you get the best experience on our website.',
-                consent_btn_accept : 'Accept Cookies',
-                consent_btn_confirm: 'Save my Settings'
-            }
-        },
-
-        this.default = {
-            name: 'Cookie Consent',
-            prefix: '_ccm',
-            url: 'https://cookies.marcelomotta.com/',
-            urlProject: 'https://github.com/marc310/cookie-consent/',
-            apiCall: 'api/cookies/property/code/',
-            description: 'Cookie notice bars are not enough!',
-            terms: 'terms.html',
-            privacy: 'privacy.html',
-            iconPreferences: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/img/cookie_1f36a.png',
-            cssCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/assets/css/cookies.css',
-            jsCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/assets/js/Cookie.js',
-            base_local: './src/plugins/cookies-consent/dist/',
-            cssLocal: 'assets/css/cookies.css',
-            jsLocal: 'assets/js/cookies.core.js',
-            expire: 15,
-            consent: false,
-            useJsCDN: false,
-            useCssCDN: true,
-            cssIncludes: [
-                'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',
-            ],
-        }
-
-    } // end config setup
-
-} // end class config
-
-//-------------------------------------------------------
 // Cookie Consent Class
 class Cookie {
 
@@ -757,7 +691,7 @@ class Cookie {
         },
         CookieSettingsElements: () => {
             
-            let div_cookie_wrapper = this.create.Element('div', { class: 'cookie_wrapper' })
+            let div_cookie_wrapper = this.create.Element('div', { class: 'cookie_wrapper', style: 'display:none' })
             document.body.after(div_cookie_wrapper)
                 // 
                 let div_cookie = this.create.Element('div', { class: 'cookie' })
@@ -901,7 +835,7 @@ class Cookie {
             
                 //
                 // Generating COokie Floater Button 
-                let floater = this.create.Element('div', { class: 'cookie_floater' })
+                let floater = this.create.Element('div', { class: 'cookie_floater', style: 'display:none' })
                     div_cookie_wrapper.after(floater)
                     // let cookie_img = this.create.Element('img', { alt: 'Cookie Privacy Settings', src: this.settings.iconPreferences })
                     // floater.appendChild(cookie_img)      
@@ -1083,8 +1017,26 @@ class Cookie {
         let apiUrl = this.Default.url + this.Default.apiCall
         let getData = fetch(apiUrl + this.clientData.code);
         
+        this.loadCSSFiles = () => {
+            if(this.Default.automaticCreateCSS === true) {
+                let css_file = this.Default.useCssCDN === true ? this.Default.cssCDN : this.Default.base_local + this.Default.cssLocal
+                this.create.CSS(css_file)
+            }
+            if (this.Default.cssIncludes.length > 0){
+                let stylesheet = this.Default.cssIncludes
+                for(let i=0; i<stylesheet.length; i++) {
+                    this.create.CSS(stylesheet[i])
+                }
+            }
+        }
+        this.loadCSSFiles()
+
         getData.then(res => res.json()).then(d => {
-            
+
+            console.log(d.preferences.domain != window.location.hostname ? 'true' : 'false')
+            console.log(d.preferences.domain)
+            console.log(window.location.hostname)
+
             //-------------------------------------------------------
             // Cookies Script Settings
             this.settings = {
@@ -1103,8 +1055,6 @@ class Cookie {
                 // base_local: d.preferences.base_local === undefined ? this.Default.base_local : d.preferences.base_local,
                 base_local: this.Default.base_local,
                 cssIncludes: (d.preferences.cssIncludes === undefined || d.preferences.cssIncludes < 1) ? this.Default.cssIncludes : d.preferences.cssIncludes,
-                // automaticCreateCSS: (d.preferences.automaticCreateCSS === undefined || d.preferences.automaticCreateCSS < 1) ? this.Default.automaticCreateCSS : d.preferences.automaticCreateCSS,
-                automaticCreateCSS: true,
                 // Consent settings
                 consent : {
                     version: '1.2',
@@ -1122,6 +1072,7 @@ class Cookie {
             this.defaultCookieName = '_' + this.settings.name.toLowerCase()
             this.configCookies = d.template
             //-------------------------------------------------------
+
         }).then( () => {
 
             for (let i = 0; i < this.configCookies.length; i++) {
@@ -1130,26 +1081,11 @@ class Cookie {
                     return false 
                 }
             }
-
-            this.render.CookieSettingsElements()
     
-            this.loadCSSFiles = () => {
-                if(this.settings.automaticCreateCSS === true) {
-                    let css_file = this.settings.useCssCDN === true ? this.Default.cssCDN : this.settings.base_local + this.Default.cssLocal
-                    this.create.CSS(css_file)
-                }
-                if (this.settings.cssIncludes.length > 0){
-                    let stylesheet = this.settings.cssIncludes
-                    for(let i=0; i<stylesheet.length; i++) {
-                        this.create.CSS(stylesheet[i])
-                    }
-                }
-            }
-            this.loadCSSFiles()
+            this.render.CookieSettingsElements()
             this.consent.validate(this.defaultCookieName, this.configCookies)
             this.consent.checkConfig(this.defaultCookieName)
 
-    
             //-------------------------------------------------------
             // Objects
             //-------------------------------------------------------
@@ -1166,7 +1102,6 @@ class Cookie {
             const cookieSettings = document.querySelector(".ccb__edit")
             const consentGive = document.querySelector(".consent__give")
             const cookieConsentBar = document.querySelector("#cconsent-bar")
-                    
     
             // more.addEventListener("click", () => {
             //     cookieMorePreferences()
@@ -1334,6 +1269,76 @@ class Cookie {
     }
 
 } // end class
+
+
+
+//-------------------------------------------------------
+// Config for Cookies Script Setup
+//-------------------------------------------------------
+
+class ConfigSetup {
+    constructor () {
+        this.options()
+    }
+
+    options() {
+
+        this.bannedList = {
+            cookies : [
+                '_gid',
+                '_ga',
+                '_fbp',
+                'euconsent-v2',
+                'pubconsent-v2',
+            ],
+            local : [
+                'sc_medium_source',
+                'statcounter.com/localstorage/'
+            ],
+        },
+
+        this.lang = {
+            en: {
+            //-------------------------------------------------------
+            // General
+                default_statusInactive : 'Off',
+                default_statusActive : 'Active',
+            // Form
+                consent_bar_message : 'This website uses cookies to ensure you get the best experience on our website.',
+                consent_btn_accept : 'Accept Cookies',
+                consent_btn_confirm: 'Save my Settings'
+            }
+        },
+
+        this.default = {
+            name: 'Cookie Consent',
+            prefix: '_ccm',
+            url: 'https://cookies.marcelomotta.com/',
+            urlProject: 'https://github.com/marc310/cookie-consent/',
+            apiCall: 'api/cookies/property/code/',
+            description: 'Cookie notice bars are not enough!',
+            terms: 'terms.html',
+            privacy: 'privacy.html',
+            iconPreferences: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/img/cookie_1f36a.png',
+            cssCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/assets/css/cookies.css',
+            jsCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/assets/js/Cookie.js',
+            base_local: './src/plugins/cookies-consent/dist/',
+            cssLocal: 'assets/css/cookies.css',
+            jsLocal: 'assets/js/cookies.core.js',
+            expire: 15,
+            consent: false,
+            useJsCDN: false,
+            useCssCDN: true,
+            automaticCreateCSS: true,
+            cssIncludes: [
+                'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',
+            ],
+        }
+
+    } // end config setup
+
+} // end class config
+
 
 
 Cookie = new Cookie()
