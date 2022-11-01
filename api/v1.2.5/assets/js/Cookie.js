@@ -5,7 +5,7 @@
 :: Project Author Name: Marcelo Motta
 :: Project Author URI: https://marcelomotta.com
 :: Project URI: https://github.com/marc310/cookie-consent
-:: Version: 1.2.4
+:: Version: 1.2.5
 :: Created: 22 Set 2022
 ************************************************************ 
 */
@@ -1060,7 +1060,7 @@ class Cookie {
                 cssIncludes: (d.preferences.cssIncludes === undefined || d.preferences.cssIncludes < 1) ? this.Default.cssIncludes : d.preferences.cssIncludes,
                 // Consent settings
                 consent : {
-                    version: '1.2',
+                    version: '1.3',
                     value: true,
                     timestamp: new Date().getTime(),
                     cookies : {
@@ -1323,8 +1323,9 @@ class ConfigSetup {
             terms: 'terms.html',
             privacy: 'privacy.html',
             iconPreferences: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/img/cookie_1f36a.png',
-            cssCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/assets/css/cookies.css',
-            jsCDN: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/assets/js/Cookie.js',
+            cdnUrl: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/v1.2.5/',
+            cssCDN: 'assets/css/cookies.css',
+            jsCDN: 'assets/js/Cookie.js',
             base_local: './src/plugins/cookies-consent/dist/',
             cssLocal: 'assets/css/cookies.css',
             jsLocal: 'assets/js/cookies.core.js',
