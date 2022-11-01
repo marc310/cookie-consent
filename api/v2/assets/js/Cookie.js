@@ -13,20 +13,44 @@
 
 //-------------------------------------------------------
 // Imports for Cookies Script Setup
-import * as Config from "./Cookie.config.js";
+// import * as Config from "./Cookie.config.js";
 //-------------------------------------------------------
 
+class ConfigSetup {
+    constructor () {
+        this.options()
+    }
 
+    options() {
 
-//-------------------------------------------------------
-// Cookie Consent Class
-class Cookie {
+        this.bannedList = {
+            cookies : [
+                '_gid',
+                '_ga',
+                '_fbp',
+                'euconsent-v2',
+                'pubconsent-v2',
+            ],
+            local : [
+                'sc_medium_source',
+                'statcounter.com/localstorage/'
+            ],
+        },
 
-    //-------------------------------------------------------
-    constructor(){
-        //-------------------------------------------------------
-        // Default Cookies Settings
-        this.Default = {
+        this.lang = {
+            en: {
+            //-------------------------------------------------------
+            // General
+                default_statusInactive : 'Off',
+                default_statusActive : 'Active',
+            // Form
+                consent_bar_message : 'This website uses cookies to ensure you get the best experience on our website.',
+                consent_btn_accept : 'Accept Cookies',
+                consent_btn_confirm: 'Save my Settings'
+            }
+        },
+
+        this.default = {
             name: 'Cookie Consent',
             prefix: '_ccm',
             url: 'https://github.com/marc310/cookie-consent',
@@ -47,6 +71,22 @@ class Cookie {
                 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',
             ],
         }
+
+    } // end config setup
+
+} // end class config
+
+//-------------------------------------------------------
+// Cookie Consent Class
+class Cookie {
+
+    //-------------------------------------------------------
+    constructor(){
+        //-------------------------------------------------------
+        // Default Cookies Settings
+        
+        this.Config = new ConfigSetup()
+        this.Default = this.Config.default
         //-------------------------------------------------------
 
         this.init()
@@ -75,7 +115,7 @@ class Cookie {
         Script: (key) => {
             let tag = key.label
             let cookieInfo = key.content != null ? key.content : ()=>{ 
-                console.log('content not exist') 
+                console.log('Content setup not exist') 
                 return false 
             };
             let wanted = cookieInfo.wanted === undefined ? true : cookieInfo.wanted
@@ -428,15 +468,15 @@ class Cookie {
 
         checkBannedList: ()=>{
             this.consent.searchGtag()
-            for(let i = 0; i < Config.bannedList.cookies.length; i++) {
-                let target = Config.bannedList.cookies[i]
+            for(let i = 0; i < this.Config.bannedList.cookies.length; i++) {
+                let target = this.Config.bannedList.cookies[i]
                 let cookie = this.manage.getCookie(target)
                 if(cookie) {
                     this.manage.deleteCookie(target)
                 }
             }
-            for(let i = 0; i < Config.bannedList.local.length; i++) {
-                let target = Config.bannedList.local[i]
+            for(let i = 0; i < this.Config.bannedList.local.length; i++) {
+                let target = this.Config.bannedList.local[i]
                 let local = this.manage.getLocalStorage(target)
                 if(local) {
                     this.manage.deleteLocalStorage(target)
@@ -524,7 +564,7 @@ class Cookie {
                     let input = document.getElementById('chk_' + key)
                     let status = document.getElementById(key + '_status')
 
-                    status.innerHTML = wanted === true ? Config.lang.en.default_statusActive : Config.lang.en.default_statusInactive
+                    status.innerHTML = wanted === true ? this.Config.lang.en.default_statusActive : this.Config.lang.en.default_statusInactive
                     if(wanted) {
                         status.classList.add('class', 'success')
                         status.classList.remove('class', 'default')
@@ -545,7 +585,7 @@ class Cookie {
                     let wanted = this.configCookies[i].wanted === undefined ? defaultConsent : this.configCookies[i].wanted
                     let input = document.getElementById('chk_' + key)
                     let status = document.getElementById(key + '_status')
-                    status.innerHTML = wanted === true ? Config.lang.en.default_statusActive : Config.lang.en.default_statusInactive
+                    status.innerHTML = wanted === true ? this.Config.lang.en.default_statusActive : this.Config.lang.en.default_statusInactive
                     if(input) { 
                         input.checked = wanted
                     }
@@ -830,8 +870,7 @@ class Cookie {
                                                 divScriptName.appendChild(span_li)
                                     // checkbox
                                     // TODO.. incluir botao badge pra identificar o status
-                                    
-                                    let status = this.render.badge(Config.lang.en.default_statusInactive, 'status default')
+                                    let status = this.render.badge(this.Config.lang.en.default_statusInactive, 'status default')
                                     status.setAttribute('id', cookie_name+'_status')
                                     cookie_li.appendChild(status)
 
@@ -859,7 +898,7 @@ class Cookie {
                                 let confirm_cookies = this.create.Element('input', { 
                                     id: 'confirmCookies', 
                                     type: 'submit', 
-                                    value: Config.lang.en.consent_btn_confirm
+                                    value: this.Config.lang.en.consent_btn_confirm
                                 })
                                 back_footer.appendChild(confirm_cookies)
                                 let iconConfirmChoices = this.create.Element('span', { class: 'material-symbols-outlined'})
@@ -897,7 +936,7 @@ class Cookie {
                         let cc_left = this.create.Element('div', { class: 'ccb__left'})
                             cc_wrapper.appendChild(cc_left)
                             let cc_text = this.create.Element('div', { class: 'cc-text'})
-                                cc_text.innerHTML = Config.lang.en.consent_bar_message
+                                cc_text.innerHTML = this.Config.lang.en.consent_bar_message
                                 cc_left.appendChild(cc_text)
                         //
                         let cc_right = this.create.Element('div', { class: 'ccb__right'})
@@ -916,7 +955,7 @@ class Cookie {
                                     class: 'consent__give',
                                     type: 'submit',
                                 })
-                                buttonConsent.innerHTML = Config.lang.en.consent_btn_accept
+                                buttonConsent.innerHTML = this.Config.lang.en.consent_btn_accept
                                 cc_button.appendChild(buttonConsent)
                                 
                                 // '<span class="material-symbols-outlined">cookie</span>'
@@ -962,7 +1001,7 @@ class Cookie {
                     // let content = this.configCookies[i][1]
                     this.settings.consent.cookies[n] = {}
                     this.settings.consent.cookies[n].wanted = value
-                    // Config.consent.cookies[n].script = content.script
+                    // this.Config.consent.cookies[n].script = content.script
                 }
             }
             // 
@@ -983,12 +1022,12 @@ class Cookie {
                     // TODO.. need detect and exclude _ga and _gi if exist to complete the remotion of analytics cookies
                     
                     // setAllConsent(false)
-                    // Config.consent.value = false
+                    // this.Config.consent.value = false
                     // manage.setLocalStorage(defaultConsentName, 'declined')
                     // if(manage.getLocalStorage(defaultConsentName)){
                     //     manage.deleteLocalStorage(defaultConsentName)
                     // }
-                    // Consent.set(JSON.stringify(Config.consent))
+                    // Consent.set(JSON.stringify(this.Config.consent))
                     this.manage.clearLocal()
                     this.manage.clearSession()
                     this.consent.clearCookies()
@@ -1037,12 +1076,11 @@ class Cookie {
     // Starting App
     //-------------------------------------------------------
     init = () => { 
-        
+
         // const __code='FCB73330E3226E2';
         this.clientData = {
             "code": __code
         }
-        console.log(this.clientData.__code)
         let apiUrl = "https://cookies.marcelomotta.com/api/cookies/property/code/"
         let getData = fetch(apiUrl + this.clientData.code);
         
@@ -1159,11 +1197,11 @@ class Cookie {
                     if(input.checked === true) {
                         badge.classList.add('success')
                         badge.classList.remove('default')
-                        badge.innerHTML = Config.lang.en.default_statusActive
+                        badge.innerHTML = this.Config.lang.en.default_statusActive
                     } else {
                         badge.classList.add('default')
                         badge.classList.remove('success')
-                        badge.innerHTML = Config.lang.en.default_statusInactive
+                        badge.innerHTML = this.Config.lang.en.default_statusInactive
                     }
                 }
             });
