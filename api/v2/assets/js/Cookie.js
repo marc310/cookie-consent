@@ -12,8 +12,7 @@
 
 
 //-------------------------------------------------------
-// Imports for Cookies Script Setup
-// import * as Config from "./Cookie.config.js";
+// Config for Cookies Script Setup
 //-------------------------------------------------------
 
 class ConfigSetup {
