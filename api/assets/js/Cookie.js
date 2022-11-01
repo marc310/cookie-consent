@@ -5,7 +5,7 @@
 :: Project Author Name: Marcelo Motta
 :: Project Author URI: https://marcelomotta.com
 :: Project URI: https://github.com/marc310/cookie-consent
-:: Version: 1.2.3
+:: Version: 1.2.4
 :: Created: 22 Set 2022
 ************************************************************ 
 */
@@ -1032,6 +1032,9 @@ class Cookie {
         this.loadCSSFiles()
 
         getData.then(res => res.json()).then(d => {
+
+            // TODO..
+            // need validate user account here, check domain and if is a valid user
 
             console.log(d.preferences.domain != window.location.hostname ? 'true' : 'false')
             console.log(d.preferences.domain)
