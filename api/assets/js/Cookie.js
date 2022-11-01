@@ -51,7 +51,9 @@ class ConfigSetup {
         this.default = {
             name: 'Cookie Consent',
             prefix: '_ccm',
-            url: 'https://github.com/marc310/cookie-consent',
+            url: 'https://cookies.marcelomotta.com/',
+            urlProject: 'https://github.com/marc310/cookie-consent/',
+            apiCall: 'api/cookies/property/code/',
             description: 'Cookie notice bars are not enough!',
             terms: 'terms.html',
             privacy: 'privacy.html',
@@ -80,12 +82,6 @@ class Cookie {
 
     //-------------------------------------------------------
     constructor(){
-
-        //-------------------------------------------------------
-        // Default Cookies Settings
-        this.Config = new ConfigSetup()
-        this.Default = this.Config.default
-        //-------------------------------------------------------
 
         this.init()
 
@@ -1075,11 +1071,16 @@ class Cookie {
     //-------------------------------------------------------
     init = () => { 
 
-        // const __code='FCB73330E3226E2';
+        //-------------------------------------------------------
+        // Default Cookies Settings
+        this.Config = new ConfigSetup()
+        this.Default = this.Config.default
+        //-------------------------------------------------------
+        // const __code='FCB73330E3226E2'; // example
         this.clientData = {
             "code": __code
         }
-        let apiUrl = "https://cookies.marcelomotta.com/api/cookies/property/code/"
+        let apiUrl = this.Default.url + this.Default.apiCall
         let getData = fetch(apiUrl + this.clientData.code);
         
         getData.then(res => res.json()).then(d => {
@@ -1185,6 +1186,7 @@ class Cookie {
                 const input = element.getElementsByTagName("input")[0];
                 const badge = element.getElementsByClassName("status")[0];
                 const data = element.nextElementSibling;
+                const config = new ConfigSetup()
                 if (iEl.className == "far fa-minus") {
                     iEl.classList.value = "fas fa-plus";
                 } else {
@@ -1195,11 +1197,11 @@ class Cookie {
                     if(input.checked === true) {
                         badge.classList.add('success')
                         badge.classList.remove('default')
-                        badge.innerHTML = this.Config.lang.en.default_statusActive
+                        badge.innerHTML = config.lang.en.default_statusActive
                     } else {
                         badge.classList.add('default')
                         badge.classList.remove('success')
-                        badge.innerHTML = this.Config.lang.en.default_statusInactive
+                        badge.innerHTML = config.lang.en.default_statusInactive
                     }
                 }
             });
