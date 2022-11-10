@@ -5,7 +5,7 @@
 :: Project Author Name: Marcelo Motta
 :: Project Author URI: https://marcelomotta.com
 :: Project URI: https://github.com/marc310/cookie-consent
-:: Version: 1.2.6
+:: Version: 1.2.7
 :: Created: 22 Set 2022
 ************************************************************ 
 */
@@ -186,7 +186,27 @@ class Cookie {
                 return false
             }
         },
+
+        TagManager: (gtm) => {
+            let tag = document.createElement('script')
+            tag.text = `<!-- Google Tag Manager -->
+                            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                            })(window,document,'script','dataLayer','GTM-5FQVBW3');
+                            <!-- End Google Tag Manager -->`;
+            document.head.appendChild(tag)
+            let noscript = document.createElement('noscript')
+            noscript.text = `<!-- Google Tag Manager (noscript) -->
+                            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5FQVBW3"
+                            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+                            <!-- End Google Tag Manager (noscript) -->`;
+            document.body.appendChild(noscript);
             
+        },
+
+        
         Analytics: (ga_code) => {
             let Analytics = document.createElement('script');
             Analytics.setAttribute('src', `https://www.googletagmanager.com/gtag/js?id=${ga_code}`);
@@ -1032,44 +1052,50 @@ class Cookie {
         this.loadCSSFiles()
 
         getData.then(res => res.json()).then(d => {
-            // debugger
-            this.validDomain = d.preferences.domain != window.location.hostname ? false : true
-            //-------------------------------------------------------
-            // Cookies Script Settings
-            this.settings = {
-                // General settings
-                name : d.preferences.name === undefined ? this.Default.name : d.preferences.name,
-                prefix : d.preferences.prefix === undefined ? this.Default.prefix : d.preferences.prefix,
-                description: d.preferences.description === undefined ? this.Default.description : d.preferences.description,
-                url: d.preferences.website === undefined ? this.Default.url : d.preferences.website,
-                privacyPage: d.preferences.privacyPage === undefined ? this.Default.privacy : d.preferences.privacyPage,
-                termsPage: d.preferences.termsPage === undefined ? this.Default.terms : d.preferences.termsPage,
-                expire: d.preferences.expire === undefined ? this.Default.expire : d.preferences.expire,
-                defaultConsent: d.preferences.consent === undefined ? this.Default.consent : d.preferences.consent,
-                useJsCDN: d.preferences.useJsCDN === undefined ? this.Default.useJsCDN : d.preferences.useJsCDN,
-                useCssCDN: d.preferences.useCssCDN === undefined ? this.Default.useCssCDN : d.preferences.useCssCDN,
-                iconPreferences: d.preferences.iconPreferences === undefined ? this.Default.iconPreferences : d.preferences.iconPreferences,
-                // base_local: d.preferences.base_local === undefined ? this.Default.base_local : d.preferences.base_local,
-                base_local: this.Default.base_local,
-                cssIncludes: (d.preferences.cssIncludes === undefined || d.preferences.cssIncludes < 1) ? this.Default.cssIncludes : d.preferences.cssIncludes,
-                // Consent settings
-                consent : {
-                    version: '1.3',
-                    value: true,
-                    timestamp: new Date().getTime(),
-                    cookies : {
+
+            this.cookieService = (d.status == undefined) ? true : false
+            
+            if (this.cookieService == true) {
+                console.log(this.cookieService != undefined ? true : false)
+                this.validDomain = d.preferences.domain != window.location.hostname ? false : true
+                //-------------------------------------------------------
+                // Cookies Script Settings
+                this.settings = {
+                    // General settings
+                    name : d.preferences.name === undefined ? this.Default.name : d.preferences.name,
+                    prefix : d.preferences.prefix === undefined ? this.Default.prefix : d.preferences.prefix,
+                    description: d.preferences.description === undefined ? this.Default.description : d.preferences.description,
+                    url: d.preferences.website === undefined ? this.Default.url : d.preferences.website,
+                    privacyPage: d.preferences.privacyPage === undefined ? this.Default.privacy : d.preferences.privacyPage,
+                    termsPage: d.preferences.termsPage === undefined ? this.Default.terms : d.preferences.termsPage,
+                    expire: d.preferences.expire === undefined ? this.Default.expire : d.preferences.expire,
+                    defaultConsent: d.preferences.consent === undefined ? this.Default.consent : d.preferences.consent,
+                    useJsCDN: d.preferences.useJsCDN === undefined ? this.Default.useJsCDN : d.preferences.useJsCDN,
+                    useCssCDN: d.preferences.useCssCDN === undefined ? this.Default.useCssCDN : d.preferences.useCssCDN,
+                    iconPreferences: d.preferences.iconPreferences === undefined ? this.Default.iconPreferences : d.preferences.iconPreferences,
+                    // base_local: d.preferences.base_local === undefined ? this.Default.base_local : d.preferences.base_local,
+                    base_local: this.Default.base_local,
+                    cssIncludes: (d.preferences.cssIncludes === undefined || d.preferences.cssIncludes < 1) ? this.Default.cssIncludes : d.preferences.cssIncludes,
+                    // Consent settings
+                    consent : {
+                        version: '1.3',
+                        value: true,
+                        timestamp: new Date().getTime(),
+                        cookies : {
+                        }
                     }
                 }
+                //-------------------------------------------------------
+                //-------------------------------------------------------
+                this.w3orgSvg = 'http://www.w3.org/2000/svg'
+                this.appJavascript = 'text/javascript'
+                this.defaultConsentName = this.settings.prefix + '_consent'
+                this.defaultCookieName = '_' + this.settings.name.toLowerCase()
+                this.configCookies = d.template
+                this.validDomain = d.preferences.domain != window.location.hostname ? false : true
+                this.domain = d.preferences.domain
+                //-------------------------------------------------------
             }
-            //-------------------------------------------------------
-            //-------------------------------------------------------
-            this.w3orgSvg = 'http://www.w3.org/2000/svg'
-            this.appJavascript = 'text/javascript'
-            this.defaultConsentName = this.settings.prefix + '_consent'
-            this.defaultCookieName = '_' + this.settings.name.toLowerCase()
-            this.configCookies = d.template
-            this.validDomain = d.preferences.domain != window.location.hostname ? false : true
-            //-------------------------------------------------------
 
         }).then( () => {
             
@@ -1079,187 +1105,192 @@ class Cookie {
             // console.log(d.preferences.domain != window.location.hostname ? 'true' : 'false')
             // console.log(d.preferences.domain)
             // console.log(window.location.hostname)
-            if (this.validDomain){
+            if (this.cookieService == true){
+                // verify first if cookie service is active
+                // after that verify the domain
+                if (this.validDomain){
+                    
+                    console.log('success: valid domain : ' + this.domain)
                 
-                console.log('success: valid domain')
-            
-                for (let i = 0; i < this.configCookies.length; i++) {
-                    if(this.configCookies[i].content === null){ 
-                        console.log('No cookie in use | Error: Cookies consent not configured properly')
-                        return false 
-                    }
-                }
-        
-                this.render.CookieSettingsElements()
-                this.consent.validate(this.defaultCookieName, this.configCookies)
-                this.consent.checkConfig(this.defaultCookieName)
-
-                //-------------------------------------------------------
-                // Objects
-                //-------------------------------------------------------
-                const close = document.querySelector(".close");
-                const cookieWrapper = document.querySelector(".cookie_wrapper");
-                // const front = document.querySelector(".front");
-                const back = document.querySelector(".back");
-                // const more = document.querySelector("#more_cookie");
-                // const backicon = document.querySelector(".back_icon");
-                const cookieFloater = document.querySelector(".cookie_floater");
-                // const allowCookies = document.querySelector('#allowCookies');
-                // const declineCookies = document.querySelector('#declineCookies');
-                const confirmCookies = document.querySelector('#confirmCookies');
-                const cookieSettings = document.querySelector(".ccb__edit")
-                const consentGive = document.querySelector(".consent__give")
-                const cookieConsentBar = document.querySelector("#cconsent-bar")
-        
-                // more.addEventListener("click", () => {
-                //     cookieMorePreferences()
-                // });
-        
-                // backicon.addEventListener("click", () => {
-                // cookiePreferences()
-                // });
-        
-                const tab = document.querySelector(".tab");
-                const liEl = tab.getElementsByTagName("li");
-        
-                for (let i = 0; i < liEl.length; i++) {
-                const element = liEl[i];
-                element.addEventListener("click", function () {
-                    const iEl = element.getElementsByTagName("i")[0];
-                    const input = element.getElementsByTagName("input")[0];
-                    const badge = element.getElementsByClassName("status")[0];
-                    const data = element.nextElementSibling;
-                    const config = new ConfigSetup()
-                    if (iEl.className == "far fa-minus") {
-                        iEl.classList.value = "fas fa-plus";
-                    } else {
-                        iEl.classList.value = "far fa-minus";
-                    }
-                    data.classList.toggle("active");
-                    if(input != undefined) {
-                        if(input.checked === true) {
-                            badge.classList.add('success')
-                            badge.classList.remove('default')
-                            badge.innerHTML = config.lang.en.default_statusActive
-                        } else {
-                            badge.classList.add('default')
-                            badge.classList.remove('success')
-                            badge.innerHTML = config.lang.en.default_statusInactive
+                    for (let i = 0; i < this.configCookies.length; i++) {
+                        if(this.configCookies[i].content === null){ 
+                            console.log('No cookie in use | Error: Cookies consent not configured properly')
+                            return false 
                         }
                     }
-                });
-                }
-                
-                //-------------------------------------------------------
-                // Visual Actions
-                //-------------------------------------------------------
-                
-                this.consentBarHide = () => {
-                    cookieConsentBar.classList.add('collapse')
-                }
-                this.consentBarShow = function () {
-                    cookieConsentBar.classList.remove('collapse')
-                }
-                
-                this.floaterVisible = () => {
-                    cookieWrapper.style.display = "none";
-                    cookieFloater.style.display = "flex";
-                }
-                this.floaterHide = () => {
-                    cookieWrapper.style.display = "flex";
-                    cookieFloater.style.display = "none";
-                }
-                this.privacySettings = () => {
-                    back.style.display = "flex";
-                    // front.style.display = "flex";
-                }
-                this.cookieMorePreferences = () => {
-                    // front.style.display = "none";
-                    this.consentBarHide()
-                    back.style.display = "flex";
-                }
-        
-                //-------------------------------------------------------
-                // Event Listeners
-                //-------------------------------------------------------
-        
-                cookieSettings.addEventListener("click", () => {
-                    cookieWrapper.style.display = "flex";
-                    // cookieConsentBar.classList.add('collapse')
-                    this.consentBarHide()
-                })
-        
-                confirmCookies.addEventListener("click", ()=> {
-                    const pref = this.Data.getFormPref();
-                    this.Data.bake(pref, 'setCookie', true)
-                    // cookieWrapper.style.display = "none";
-                    // cookieFloater.style.display = "flex";
-                    this.floaterVisible()
-                })
-        
-                consentGive.addEventListener("click", () => {
-                    this.Data.bake(this.Data.getAllPref(), 'setCookie')
-                    cookieConsentBar.classList.add('collapse')
-                    // cookieWrapper.style.display = "none";
-                    // cookieFloater.style.display = "flex";
-                    this.consentBarHide()
-                    this.floaterVisible()
-                })
-        
-                // const name = this.settings.name === undefined ? Default.name : this.settings.name
-                const c = this.manage.getCookie(this.defaultCookieName)
-                
-                close.addEventListener("click", () => {
-                    if (!c){
-                        this.consentBarShow() // *(deprecated)
-                        // cookieConsentBar.classList.remove('collapse')
-                        cookieWrapper.style.display = "none";
-                    }else {
-                        // cookieWrapper.style.display = "none";
-                        // cookieFloater.style.display = "flex";
-                        this.floaterVisible()
+            
+                    this.render.CookieSettingsElements()
+                    this.consent.validate(this.defaultCookieName, this.configCookies)
+                    this.consent.checkConfig(this.defaultCookieName)
+
+                    //-------------------------------------------------------
+                    // Objects
+                    //-------------------------------------------------------
+                    const close = document.querySelector(".close");
+                    const cookieWrapper = document.querySelector(".cookie_wrapper");
+                    // const front = document.querySelector(".front");
+                    const back = document.querySelector(".back");
+                    // const more = document.querySelector("#more_cookie");
+                    // const backicon = document.querySelector(".back_icon");
+                    const cookieFloater = document.querySelector(".cookie_floater");
+                    // const allowCookies = document.querySelector('#allowCookies');
+                    // const declineCookies = document.querySelector('#declineCookies');
+                    const confirmCookies = document.querySelector('#confirmCookies');
+                    const cookieSettings = document.querySelector(".ccb__edit")
+                    const consentGive = document.querySelector(".consent__give")
+                    const cookieConsentBar = document.querySelector("#cconsent-bar")
+            
+                    // more.addEventListener("click", () => {
+                    //     cookieMorePreferences()
+                    // });
+            
+                    // backicon.addEventListener("click", () => {
+                    // cookiePreferences()
+                    // });
+            
+                    const tab = document.querySelector(".tab");
+                    const liEl = tab.getElementsByTagName("li");
+            
+                    for (let i = 0; i < liEl.length; i++) {
+                    const element = liEl[i];
+                    element.addEventListener("click", function () {
+                        const iEl = element.getElementsByTagName("i")[0];
+                        const input = element.getElementsByTagName("input")[0];
+                        const badge = element.getElementsByClassName("status")[0];
+                        const data = element.nextElementSibling;
+                        const config = new ConfigSetup()
+                        if (iEl.className == "far fa-minus") {
+                            iEl.classList.value = "fas fa-plus";
+                        } else {
+                            iEl.classList.value = "far fa-minus";
+                        }
+                        data.classList.toggle("active");
+                        if(input != undefined) {
+                            if(input.checked === true) {
+                                badge.classList.add('success')
+                                badge.classList.remove('default')
+                                badge.innerHTML = config.lang.en.default_statusActive
+                            } else {
+                                badge.classList.add('default')
+                                badge.classList.remove('success')
+                                badge.innerHTML = config.lang.en.default_statusInactive
+                            }
+                        }
+                    });
                     }
-                })
-        
-                cookieFloater.addEventListener("click", () => {
-                    this.privacySettings()
-                    // back.style.display = "flex";
-                    // cookieWrapper.style.display = "flex";
-                    // cookieFloater.style.display = "none";
-                    this.floaterHide()
-                })
-                // allowCookies.addEventListener("click", ()=> {
-                //     Cookie.bake(getAllPref(), setCookie)
-                //     floaterVisible()
-        
-                // });
-        
-                // declineCookies.addEventListener("click", ()=> {
-                //     Cookie.bake(getAllPref(), deleteCookie)
-                //     floaterVisible()
-                // });
-        
-                let localCookies = this.manage.localCookies(this.defaultCookieName)
-                if (localCookies) {
-                    if (localCookies.value === false) {
-                        // this.consentBarShow()
+                    
+                    //-------------------------------------------------------
+                    // Visual Actions
+                    //-------------------------------------------------------
+                    
+                    this.consentBarHide = () => {
+                        cookieConsentBar.classList.add('collapse')
+                    }
+                    this.consentBarShow = function () {
                         cookieConsentBar.classList.remove('collapse')
-                    } else {
-                        // this.floaterVisible()
+                    }
+                    
+                    this.floaterVisible = () => {
                         cookieWrapper.style.display = "none";
                         cookieFloater.style.display = "flex";
                     }
-                } else {
-                    // this.consentBarShow()
-                    cookieConsentBar.classList.remove('collapse')
-                }
-        
-                this.resize()
+                    this.floaterHide = () => {
+                        cookieWrapper.style.display = "flex";
+                        cookieFloater.style.display = "none";
+                    }
+                    this.privacySettings = () => {
+                        back.style.display = "flex";
+                        // front.style.display = "flex";
+                    }
+                    this.cookieMorePreferences = () => {
+                        // front.style.display = "none";
+                        this.consentBarHide()
+                        back.style.display = "flex";
+                    }
+            
+                    //-------------------------------------------------------
+                    // Event Listeners
+                    //-------------------------------------------------------
+            
+                    cookieSettings.addEventListener("click", () => {
+                        cookieWrapper.style.display = "flex";
+                        // cookieConsentBar.classList.add('collapse')
+                        this.consentBarHide()
+                    })
+            
+                    confirmCookies.addEventListener("click", ()=> {
+                        const pref = this.Data.getFormPref();
+                        this.Data.bake(pref, 'setCookie', true)
+                        // cookieWrapper.style.display = "none";
+                        // cookieFloater.style.display = "flex";
+                        this.floaterVisible()
+                    })
+            
+                    consentGive.addEventListener("click", () => {
+                        this.Data.bake(this.Data.getAllPref(), 'setCookie')
+                        cookieConsentBar.classList.add('collapse')
+                        // cookieWrapper.style.display = "none";
+                        // cookieFloater.style.display = "flex";
+                        this.consentBarHide()
+                        this.floaterVisible()
+                    })
+            
+                    // const name = this.settings.name === undefined ? Default.name : this.settings.name
+                    const c = this.manage.getCookie(this.defaultCookieName)
+                    
+                    close.addEventListener("click", () => {
+                        if (!c){
+                            this.consentBarShow() // *(deprecated)
+                            // cookieConsentBar.classList.remove('collapse')
+                            cookieWrapper.style.display = "none";
+                        }else {
+                            // cookieWrapper.style.display = "none";
+                            // cookieFloater.style.display = "flex";
+                            this.floaterVisible()
+                        }
+                    })
+            
+                    cookieFloater.addEventListener("click", () => {
+                        this.privacySettings()
+                        // back.style.display = "flex";
+                        // cookieWrapper.style.display = "flex";
+                        // cookieFloater.style.display = "none";
+                        this.floaterHide()
+                    })
+                    // allowCookies.addEventListener("click", ()=> {
+                    //     Cookie.bake(getAllPref(), setCookie)
+                    //     floaterVisible()
+            
+                    // });
+            
+                    // declineCookies.addEventListener("click", ()=> {
+                    //     Cookie.bake(getAllPref(), deleteCookie)
+                    //     floaterVisible()
+                    // });
+            
+                    let localCookies = this.manage.localCookies(this.defaultCookieName)
+                    if (localCookies) {
+                        if (localCookies.value === false) {
+                            // this.consentBarShow()
+                            cookieConsentBar.classList.remove('collapse')
+                        } else {
+                            // this.floaterVisible()
+                            cookieWrapper.style.display = "none";
+                            cookieFloater.style.display = "flex";
+                        }
+                    } else {
+                        // this.consentBarShow()
+                        cookieConsentBar.classList.remove('collapse')
+                    }
+            
+                    this.resize()
 
-            }
-            else {
-                console.log('error: not valid domain')
-                return false
+                }
+                else {
+                    console.log('error: not valid domain')
+                    return false
+                }
+                //
             }
 
         })
