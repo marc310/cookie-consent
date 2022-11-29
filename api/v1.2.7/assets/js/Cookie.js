@@ -1036,6 +1036,7 @@ class Cookie {
         }
         let apiUrl = this.Default.url + this.Default.apiCall
         let getData = fetch(apiUrl + this.clientData.code);
+        console.log(apiUrl)
         
         this.loadCSSFiles = () => {
             if(this.Default.automaticCreateCSS === true) {
