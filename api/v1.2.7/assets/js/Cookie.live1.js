@@ -1031,11 +1031,11 @@ class Cookie {
         this.Default = this.Config.default
         //-------------------------------------------------------
         // const __code='FCB73330E3226E2'; // example
-        this.clientData = {
-            "code": __code
-        }
+        // this.clientData = {
+        //     "code": __code
+        // }
         let apiUrl = this.Default.url + this.Default.apiCall
-        let getData = fetch(apiUrl + this.clientData.code);
+        let getData = fetch(apiUrl + this.__code);
         console.log(apiUrl)
         
         this.loadCSSFiles = () => {
