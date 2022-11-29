@@ -1358,8 +1358,8 @@ class ConfigSetup {
         this.default = {
             name: 'Cookie Consent',
             prefix: '_ccm',
-            // url: 'https://cookies.marcelomotta.com/',
-            url: 'http://localhost/dev/devakumaran/cookies_consent_master/',
+            url: 'https://cookies.marcelomotta.com/',
+            // url: 'http://localhost/dev/devakumaran/cookies_consent_master/',
             urlProject: 'https://github.com/marc310/cookie-consent/',
             apiCall: 'api/cookies/property/code/',
             description: 'Cookie notice bars are not enough!',
