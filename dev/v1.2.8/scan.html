@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Script Crawler</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="./assets/js/Scanner.js"></script>
+</head>
+<body  style="text-align:center;">
+    <h1 style="color: green">
+		Data Script Crawler
+	</h1>
+    
+    <div class="form">
+        <input type="text" name="domain" id="domain" placeholder="Enter your domain to scan">
+        <button onclick="scan()">Scan this Page</button>
+        <button style="background-color: red;" onclick="deleteCookies()">Delete Cookies</button>
+    </div>
+
+    <pre id="result">
+
+    </pre>
+
+    <div id="pageContent" style="width: 400px; height: 400px; background: gray; opacity: 0; display: none;"></div>
+</body>
+</html>

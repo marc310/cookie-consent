@@ -5,7 +5,7 @@
 :: Project Author Name: Marcelo Motta
 :: Project Author URI: https://marcelomotta.com
 :: Project URI: https://github.com/marc310/cookie-consent
-:: Version: 1.2.7
+:: Version: 1.2.8
 :: Created: 22 Set 2022
 ************************************************************ 
 */
@@ -57,7 +57,10 @@ class Cookie {
                     case "head" :
                         this.create.HeadScript(this.appJavascript, cookieInfo.src)
                         break;
-                    case "custom" :
+                    case "customscript" :
+                        this.create.CustomScript(cookieInfo.src)
+                        break;
+                    case "target" :
                         let target = cookieInfo.target === undefined ? tag + '_script' : cookieInfo.target
                         let btn = cookieInfo.content === undefined ? false : cookieInfo.content
                         this.create.TargetScript(this.appJavascript, cookieInfo.src, target, btn)
@@ -83,62 +86,6 @@ class Cookie {
                         break;
                 }
                 
-                // if (script === 'head') {
-                //     this.create.HeadScript(this.appJavascript, Config.Cookies.template[tag].src)
-                // } else if (script === false) {
-                //     // precisa passar um target
-                //     let target = Config.Cookies.template[tag].target === undefined ? tag + '_script' : Config.Cookies.template[tag].target
-                //     let btn = Config.Cookies.template[tag].button === undefined ? false : Config.Cookies.template[tag].button
-                //     this.create.TargetScript(this.appJavascript, Config.Cookies.template[tag].src, target, btn)
-                // } 
-                // if (script != 'custom' || script != 'head') {
-                //     // null scripts wanted true = application/javascript
-                //     let ConfigPath = Config.Cookies.template[tag]
-                //     //
-                //     // lets decide what kind of script should be generated
-                //     // TODO... refatorar esse trecho pra um for rodando em um array contendo o tipo e o codigo pra chamar a função especifica
-                //     let scriptType = ConfigPath.script.toLowerCase()
-                //     console.log(scriptType)
-                    
-                //     switch (scriptType) {
-                //         case "analytics" :
-                //             this.create.Analytics(ConfigPath.ga_code)
-                //             break;
-                //         case "facebook" :
-                //             this.create.Facebook(ConfigPath.fb_code)
-                //             break;
-                //         case "hotjar" :
-                //             this.create.Hotjar(ConfigPath.hj_code)
-                //             break;
-                //         case "statcounter" :
-                //             let project = ConfigPath.sc_project
-                //             let security = ConfigPath.sc_security
-                //             let invisible = ConfigPath.sc_invisible
-                //             let text = ConfigPath.sc_text
-                //             this.create.Statcounter(project, security, invisible, text)
-                //             break;
-                //     }
-
-                //     // debugger
-
-                //     // if(ConfigPath.ga_code){
-                //     //     this.create.Analytics(ConfigPath.ga_code)
-                //     // } else if (ConfigPath.fb_code) {
-                //     //     this.create.Facebook(ConfigPath.fb_code)
-                //     // } else if (ConfigPath.hj_code) {
-                //     //     this.create.Hotjar(ConfigPath.hj_code)
-                //     // }
-                //     // else if (ConfigPath.sc_project) {
-                //     //     let project = ConfigPath.sc_project
-                //     //     let security = ConfigPath.sc_security
-                //     //     let invisible = ConfigPath.sc_invisible
-                //     //     let text = ConfigPath.sc_text
-                //     //     this.create.Statcounter(project, security, invisible, text)
-                //     // }
-                //     // else {
-                //     //     unblockScript(tag, true)
-                //     // }
-                // }
             } 
             // else if (wanted === false && script === null) {
             //     let extraTag = Config.Cookies.template[tag].scriptTag === true ? true : false
@@ -152,6 +99,10 @@ class Cookie {
                 src: url
             })
             document.head.appendChild(script);
+        },
+
+        CustomScript: (content) => {
+            document.head.innerHTML += content;
         },
 
         CSS: (url) => {
@@ -206,7 +157,6 @@ class Cookie {
             
         // },
 
-        
         Analytics: (ga_code) => {   
             let Analytics = document.createElement('script');
             Analytics.setAttribute('src', `https://www.googletagmanager.com/gtag/js?id=${ga_code}`);
@@ -440,7 +390,6 @@ class Cookie {
     
         validate: (defaultname, configCookies) => {
             // let configCookies = Object.entries(Config.Cookies.template)
-            
 
             let arrayCookies = this.manage.arrayCookies(defaultname)
             let localCookies = this.manage.localCookies(defaultname)
@@ -460,7 +409,6 @@ class Cookie {
                 if (version === true) {
                     this.manage.deleteCookie(this.defaultCookieName)
                 }
-            // TODO.. prevent lost consent
             } 
             if (!localStorageSettings && localCookies){
                 this.consent.searchGtag()
@@ -502,17 +450,20 @@ class Cookie {
                 let wanted = localCookies.cookies[key].wanted === undefined ? core.Default.consent : localCookies.cookies[key].wanted
                 let input = document.getElementById('chk_' + key)
                 let status = document.getElementById(key + '_status')
+                let necessary = status.classList.contains('always_active')
 
-                status.innerHTML = wanted === true ? this.Config.lang.en.default_statusActive : this.Config.lang.en.default_statusInactive
-                if(wanted) {
-                    status.classList.add('class', 'success')
-                    status.classList.remove('class', 'default')
-                }else {
-                    status.classList.remove('class', 'success')
-                    status.classList.add('class', 'default')
-                }
-                if(input) { 
-                    input.checked = wanted
+                if (!necessary) {
+                    status.innerHTML = wanted === true ? this.Config.lang.en.default_statusActive : this.Config.lang.en.default_statusInactive
+                    if(wanted) {
+                        status.classList.add('class', 'success')
+                        status.classList.remove('class', 'default')
+                    }else {
+                        status.classList.remove('class', 'success')
+                        status.classList.add('class', 'default')
+                    }
+                    if(input) { 
+                        input.checked = wanted
+                    }
                 }
             }
         },
@@ -522,11 +473,6 @@ class Cookie {
         // verifica o local storage e assinala as atribuiçoes de configurações
         checkConfig: (defaultname) => {
             // procura configurações na maquina local
-            // ou melhor rodar um foreach nas configurações locais do cookie e verificar
-            // quais wanted = true pra cada um setar o checkbox pra true pegando o elemento
-            // pelo id ex: document.getElementById('giveaway').checked = true
-            // pra diferenciar setar os ids como check_'nome'
-            // pegar o consent e gerar o form de opções
             this.setSelectors = function () {
                 let arrayCookies = this.manage.arrayCookies(defaultname)
                 let localCookies = this.manage.localCookies(defaultname)
@@ -535,8 +481,11 @@ class Cookie {
                     let wanted = localCookies.cookies[key].wanted === undefined ? core.Default.consent : localCookies.cookies[key].wanted
                     let input = document.getElementById('chk_' + key)
                     let status = document.getElementById(key + '_status')
-
-                    status.innerHTML = wanted === true ? this.Config.lang.en.default_statusActive : this.Config.lang.en.default_statusInactive
+                    let necessary = status.classList.contains('always_active')
+                    
+                    if (!necessary) {
+                        status.innerHTML = wanted === true ? this.Config.lang.en.default_statusActive : this.Config.lang.en.default_statusInactive
+                    }
                     if(wanted) {
                         status.classList.add('class', 'success')
                         status.classList.remove('class', 'default')
@@ -557,13 +506,15 @@ class Cookie {
                     let wanted = this.configCookies[i].wanted === undefined ? defaultConsent : this.configCookies[i].wanted
                     let input = document.getElementById('chk_' + key)
                     let status = document.getElementById(key + '_status')
-                    status.innerHTML = wanted === true ? this.Config.lang.en.default_statusActive : this.Config.lang.en.default_statusInactive
+                    let necessary = status.classList.contains('always_active')
+                    
+                    if (!necessary) {
+                        status.innerHTML = wanted === true ? this.Config.lang.en.default_statusActive : this.Config.lang.en.default_statusInactive
+                    }
                     if(input) { 
                         input.checked = wanted
                     }
                     if (wanted === true) {
-                        // TODO.. by default
-                        // error to 
                         status.classList.add('class', 'success')
                         status.classList.remove('class', 'default')
                         this.create.Script(this.configCookies[i])
@@ -575,8 +526,6 @@ class Cookie {
                 // console.log('cookie consent nao existe') entao cria o script por padrao
                 // default setup when user not accepted or declined
                 if (this.configCookies){
-                    // for( let i = 0; i < this.configCookies.length; i++){
-                    // }
                     // all inputs checked by default when user not consented yet
                     this.setSelectorsDefault()
                 }
@@ -588,58 +537,25 @@ class Cookie {
                     // when user declined for our cookies we need block the null scripts and not load others
                     // cada script false or script null devem ser bloqueados
                     for ( let i=0; i< this.configCookies.length; i++ ) {
-                            let wanted = false
-                            // let wanted = this.configCookies[key].wanted === undefined ? core.Default.consent : this.configCookies[key].wanted
-                            let input = document.getElementById('chk_' + this.configCookies[i].label)
+                        let wanted = false
+                        let input = document.getElementById('chk_' + this.configCookies[i].label)
+                        let needed = this.configCookies[i].needed == true ? true : false
+                        if (needed){
+                            this.create.Script(this.configCookies[i])
+                        }else {
                             if (input){
                                 input.checked = wanted == true ? wanted : false
                             }
-                        // }
-                        // let cookie = this.configCookies[i][0]
-                        // let cookieInfo = this.configCookies[i][1]
-                        // if (cookieInfo.script != true){
-                        //     let tagSetup = cookieInfo.scriptTag === true ? true : false
-                        //     debugger
-                        //     blockScript(cookie, tagSetup)
-                        // }
+                        }
+
+                        
                     }
                 }else {
                     // consent = true , consent já configurado entao deve-se verificar quais as configurações atraves do atributo wanted
                     // this.consent.validate()
                     this.consent.checkBannedList()
                     this.setSelectors()
-                //     let arrayCookies = this.manage.arrayCookies()
-                //     let localCookies = this.manage.localCookies()
-                //     for (let i = 0; i < arrayCookies.length; i++) {
-                //         let key = arrayCookies[i][0]
-                //         let wanted = localCookies.cookies[key].wanted === undefined ? core.Default.consent : localCookies.cookies[key].wanted
-                //         let input = document.getElementById('chk_' + key)
-                //         let status = document.getElementById(key + '_status')
-
-                //         status.innerHTML = wanted === true ? Config.lang.en.default_statusActive : Config.lang.en.default_statusInactive
-                //         if(wanted) {
-                //             status.classList.add('class', 'success')
-                //             status.classList.remove('class', 'default')
-                //         }
-                //         if(input) { 
-                //             input.checked = wanted
-                //         }
-                //         if (wanted === true) {
-                //             this.create.Script(this.configCookies[i])
-                //         }
-                //     }
-                // }
-                // floaterVisible()
-                // seta os inputs baseado nas configurações do cookie salvas
-                // for (const [key, value] of arrayCookies) {
-                //     // aqui eu percorro um for pelas configurações setadas da ultima vez
-                //     // console.log(`${key}: ${value}`);
-                //     let wanted = localCookies.cookies[key].wanted
-                //     let input = document.getElementById('chk_' + key)
-                //     // debugger
-                //     if (input){
-                //         input.checked = wanted == true ? wanted : false
-                //     }
+               
                 }
                 
             }
@@ -732,8 +648,65 @@ class Cookie {
                 span_badge.innerHTML = label
                 return span_badge
         },
-        CookieSettingsElements: () => {
-            
+
+        // RENDER UI BANNER CONSENT NOTICE
+        CookieSettingsElements: (layout = false) => {
+            // layout selector
+            switch (layout) {
+                case 'simple':
+                        this.render.simpleBannerLayout();
+                    break;
+
+                case 'notice':
+                        this.render.categorizedBannerLayout('notice');
+                    break;
+
+                case 'categorized':
+                        this.render.categorizedBannerLayout();
+                    break;
+
+                case 'default':
+                        this.render.defaultBannerLayout();
+                    break;
+                default:
+                        this.render.defaultBannerLayout();
+                    break;
+            }
+        },
+
+        // render layout structure for banner notice modes
+        // Default, Categorized and Simple Layout
+        categorizedBannerLayout : (param = false) => {
+            let div_cookie_wrapper = this.create.Element('div', { class: 'cookie_wrapper', style: 'display:none' })
+            document.body.after(div_cookie_wrapper)
+                // 
+                let div_cookie = this.create.Element('div', { class: 'cookie' })
+                div_cookie_wrapper.appendChild(div_cookie)
+                    // 
+                    // div close
+                    let div_close = this.create.Element('div', { class: 'close' })
+                        div_cookie.appendChild(div_close)
+                        this.render.IconClose(div_close)
+                    // 
+                    if (param == 'notice') {
+                        // FRONT CONSENT NOTICE
+                            let div_front = this.render.layoutElements.front();
+                            div_cookie.appendChild(div_front)
+                    }
+                    // BACK CONSENT NOTICE
+                    // param to back categorized : true = have button back, false = have no button back
+                        let div_back = this.render.layoutElements.back_categorized(param == 'notice' ? true : false);
+                        div_cookie.appendChild(div_back)
+                //
+                // Generating COokie Floater Button 
+                let floater = this.render.layoutElements.floater()
+                    div_cookie_wrapper.after(floater)
+                //
+                // Generating Consent Bar
+                let consent_bar = this.render.layoutElements.consent_bar();
+                    floater.after(consent_bar)
+        },
+        simpleBannerLayout : () => {
             let div_cookie_wrapper = this.create.Element('div', { class: 'cookie_wrapper', style: 'display:none' })
             document.body.after(div_cookie_wrapper)
                 // 
@@ -746,105 +719,272 @@ class Cookie {
                         
                         this.render.IconClose(div_close)
                     // 
-                    // div front
-                    // div_front = this.create.Element('div', { class: 'front' })
-                    //     div_cookie.appendChild(div_front)
-                    //     front_h1 = document.createElement('h1')
-                    //         front_h1.innerHTML = 'Privacy Preference Center'
-                    //         div_front.appendChild(front_h1)
-                    //     front_p = document.createElement('p')
-                    //         front_p.innerHTML = 'When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to our <a href="https://kessgame.com/privacy.html" id="privacy">Privacy Policy</a>.'
-                    //         div_front.appendChild(front_p)
-                    //     div_front_buttons = this.create.Element('div', { class: 'front__buttons' })
-                    //         div_front.appendChild(div_front_buttons)
-                    //         // buttons
-                    //         button_allow_front_buttons = this.create.Element('button', { 
-                    //             class: 'front__buttons', 
-                    //             type: 'submit', 
-                    //             id: 'allowCookies'
-                    //         })
-                    //         button_allow_front_buttons.innerHTML = 'Allow All'
-                    //         div_front_buttons.appendChild(button_allow_front_buttons)
-            
-                    //     //     button_decline_front_buttons = this.create.Element('button', { 
-                    //     //         class: 'front__buttons', 
-                    //     //         type: 'submit', 
-                    //     //         id: 'declineCookies'
-                    //     //     })
-                    //     //     button_decline_front_buttons.innerHTML = 'Decline unnecessary cookies'
-                    //     //     div_front_buttons.appendChild(button_decline_front_buttons)
-                    //     // // front footer
-                    //     // div_front_footer = this.create.Element('div', { class: 'front__footer' })
-                    //     // div_front.appendChild(div_front_footer)
-                    //         a_more_cookie = this.create.Element('a', { id: 'more_cookie', href: '#' })
-                    //         a_more_cookie.innerHTML = 'Manage Consent Preferences'
-                    //         div_front_buttons.appendChild(a_more_cookie)
+                    // FRONT CONSENT NOTICE
+                    // let div_front = this.render.layoutElements.front();
+                    // div_cookie.appendChild(div_front)
                     //
-                    // div back
-                    let div_back = this.create.Element('div', { class: 'back' })
+                    // BACK CONSENT NOTICE
+                    let div_back = this.render.layoutElements.back('no_button');
                     div_cookie.appendChild(div_back)
-                        let div_header_cookies = this.create.Element('div', { class: 'header-cookies' })
-                        div_back.appendChild(div_header_cookies)
+                //
+                // Generating COokie Floater Button 
+                let floater = this.render.layoutElements.floater()
+                    div_cookie_wrapper.after(floater)
+                //
+                // Generating Consent Bar
+                let consent_bar = this.render.layoutElements.consent_bar();
+                floater.after(consent_bar)
+        },
+        // Default Layout
+        defaultBannerLayout : () => {
+            let div_cookie_wrapper = this.create.Element('div', { class: 'cookie_wrapper', style: 'display:none' })
+            document.body.after(div_cookie_wrapper)
+                // 
+                let div_cookie = this.create.Element('div', { class: 'cookie' })
+                div_cookie_wrapper.appendChild(div_cookie)
+                    // 
+                    // div close
+                    let div_close = this.create.Element('div', { class: 'close' })
+                        div_cookie.appendChild(div_close)
+                        
+                        this.render.IconClose(div_close)
+                    // 
+                    // FRONT CONSENT NOTICE
+                    let div_front = this.render.layoutElements.front();
+                    div_cookie.appendChild(div_front)
+                    //
+                    // BACK CONSENT NOTICE
+                    let div_back = this.render.layoutElements.back();
+                    div_cookie.appendChild(div_back)
+                //
+                // Generating COokie Floater Button 
+                let floater = this.render.layoutElements.floater()
+                    div_cookie_wrapper.after(floater)
+                //
+                // Generating Consent Bar
+                let consent_bar = this.render.layoutElements.consent_bar();
+                floater.after(consent_bar)
+                    
+        },
+
+        layoutElements : {
+            front : ()=> {
+                // div front
+                let div_front = this.create.Element('div', { class: 'front' })
+                // div_cookie.appendChild(div_front)
+                let front_h1 = document.createElement('h1')
+                    front_h1.innerHTML = 'Privacy Preference Center'
+                    div_front.appendChild(front_h1)
+                let front_p = document.createElement('p')
+                    front_p.innerHTML = 'When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to our <a href="https://kessgame.com/privacy.html" id="privacy">Privacy Policy</a>.'
+                    div_front.appendChild(front_p)
+                let div_front_buttons = this.create.Element('div', { class: 'front__buttons' })
+                    div_front.appendChild(div_front_buttons)
+                    // buttons
+                    let button_allow_front_buttons = this.create.Element('button', { 
+                        class: 'front__buttons', 
+                        type: 'submit', 
+                        id: 'allowCookies'
+                    })
+                    button_allow_front_buttons.innerHTML = 'Allow All'
+                    div_front_buttons.appendChild(button_allow_front_buttons)
+    
+                    let button_decline_front_buttons = this.create.Element('button', { 
+                        class: 'front__buttons', 
+                        type: 'submit', 
+                        id: 'declineCookies'
+                    })
+                    button_decline_front_buttons.innerHTML = 'Decline unnecessary cookies'
+                    div_front_buttons.appendChild(button_decline_front_buttons)
+                // front footer
+                let div_front_footer = this.create.Element('div', { class: 'front__footer' })
+                div_front.appendChild(div_front_footer)
+                    let a_more_cookie = this.create.Element('a', { id: 'more_cookie', href: '#' })
+                    a_more_cookie.innerHTML = 'Manage Consent Preferences'
+                    div_front_footer.appendChild(a_more_cookie)
+                return div_front;
+            //
+            }, // end front
+            back_categorized : (button)=> {
+                // div back
+                let div_back = this.create.Element('div', { class: 'back' })
+                // div_cookie.appendChild(div_back)
+                    let div_header_cookies = this.create.Element('div', { class: 'header-cookies' })
+                    div_back.appendChild(div_header_cookies)
+                    //
+                        if(button) {
                             let div_back_icons = this.create.Element('div', { class: 'back_icons' })
                             div_header_cookies.appendChild(div_back_icons)
-                                // div_back_icon = this.create.Element('div', { class: 'back_icon' })
-                                // div_back_icons.appendChild(div_back_icon)
-                                //     this.render.IconBack(div_back_icon)
-                                //
-                                let div_back_title = this.create.Element('h1', { class: '' })
-                                div_back_title.innerHTML = 'Manage Consent Preferences'
-                                div_header_cookies.appendChild(div_back_title)
-                        //
-                        // generating form
-                        let cookie_options = this.create.Element('form', { class: 'cookie_options' })
-                            div_back.appendChild(cookie_options)
-                            // generating UL
-                            let cookie_options_tab = this.create.Element('ul', { class: 'tab tab_consent_form' })
-                            cookie_options.prepend(cookie_options_tab)
-                                // necessary cookies
-                                let cookie_li = document.createElement('li')
-                                cookie_options_tab.appendChild(cookie_li)
-                                    let iconPlus = this.create.Element('i', { class: 'fas fa-plus' })
-                                    cookie_li.appendChild(iconPlus)
-                                    let h2_li = document.createElement('h2')
-                                    h2_li.innerHTML = 'Strictly Necessary Cookies'
-                                    cookie_li.appendChild(h2_li)
-                                    let span_badge = this.render.badge('Always Active')
-                                    cookie_li.appendChild(span_badge)
-                                let cookie_li_data = this.create.Element('div', { class: 'data2' })
+                                let div_back_icon = this.create.Element('div', { class: 'back_icon' })
+                                div_back_icons.appendChild(div_back_icon)
+                                    this.render.IconBack(div_back_icon)
+                        }
+                            
+                            let div_back_title = this.create.Element('h1', { class: '' })
+                            div_back_title.innerHTML = 'Manage Consent Preferences'
+                            div_header_cookies.appendChild(div_back_title)
+                    //
+                    // generating categorized form
+                    let cookie_options = this.create.Element('form', { class: 'cookie_options' })
+                        div_back.appendChild(cookie_options)
+                        // generating UL
+                        let cookie_options_tab = this.create.Element('ul', { class: 'tab tab_consent_form' })
+                        cookie_options.prepend(cookie_options_tab)
+                        
+                        // strictly necessary cookies default bar
+                        // let cookie_li = document.createElement('li')
+                        // cookie_options_tab.appendChild(cookie_li)
+                        //     let iconPlus = this.create.Element('i', { class: 'fas fa-plus' })
+                        //     cookie_li.appendChild(iconPlus)
+                        //     let h2_li = document.createElement('h2')
+                        //     h2_li.innerHTML = 'Strictly Necessary Cookies'
+                        //     cookie_li.appendChild(h2_li)
+                        //     let span_badge = this.render.badge('Always Active')
+                        //     cookie_li.appendChild(span_badge)
+                        // let cookie_li_data = this.create.Element('div', { class: 'data2' })
+                        // cookie_options_tab.appendChild(cookie_li_data)
+                        //     let cookie_li_data_p = document.createElement('p')
+                        //     cookie_li_data_p.innerHTML = 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.'
+                        //     cookie_li_data.appendChild(cookie_li_data_p)
+                    
+                        // Starting Loop Contents Selectors
+                        for (let i = 0; i < this.configCookies.length; i++){
+                            let purpose = this.configCookies[i].purpose;
+                            let cookie_name = this.configCookies[i].label
+                            let description = this.configCookies[i].description
+                            let title = this.configCookies[i].title
+                            let category = this.configCookies[i].purpose
+                            let always_active = this.configCookies[i].needed == true ? true : false
+                            // let always_active = purpose == 'necessary' ? true : false
+
+                            let list_exists = ()=> {
+                                let purpose_list = cookie_options_tab.querySelector('li.' + purpose + '_list')
+                                // console.log(purpose_list)
+                                if (purpose_list != null) {
+                                    // console.log('elemento existe')
+                                    return 200
+                                } else {
+                                    // console.log('elemento nao existe')
+                                    return 400;
+                                }
+                            }
+                            let get_list = (purpose)=> {
+                                let cookie_li = cookie_options_tab.querySelector('li.' + purpose + '_list').nextSibling
+                                    return cookie_li;
+                            }
+                            let create_list = (purpose)=> {
+                                // cria elemento li
+                                let cookie_li = this.render.layoutElements.li_content(purpose, category, description)
+                                    return cookie_li;
+                            }
+                            let create_collapsible = (purpose)=> {
+                                let cookie_li_data = this.create.Element('div', { class: 'data_category data_' + purpose })
+                                    return cookie_li_data
+                            }
+                            if (list_exists() == 400) {
+                                let cookie_li = create_list(purpose)
+                                cookie_options_tab.appendChild(cookie_li) 
+
+                                let cookie_li_data = create_collapsible(purpose)
                                 cookie_options_tab.appendChild(cookie_li_data)
-                                    let cookie_li_data_p = document.createElement('p')
-                                    cookie_li_data_p.innerHTML = 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.'
-                                    cookie_li_data.appendChild(cookie_li_data_p)
-                            //
-                            // cria os elementos baseados no consent config object
-                            for (let i = 0; i < this.configCookies.length; i++){
-                                let cookie_name = this.configCookies[i].label
-                                let description_cookie = this.configCookies[i].description
-                                // TODO.. adjust name title
-                                let title = this.configCookies[i].title
-                                let category = this.configCookies[i].purpose
-                                // let title = cookie_name == 'giveaway' ? 'Third-Party Cookies' : cookie_name + ' Cookies'
-                                let cookie_li = document.createElement('li')
-                                cookie_options_tab.appendChild(cookie_li)
-                                    let iconPlus = this.create.Element('i', { class: 'fas fa-plus' })
-                                    cookie_li.appendChild(iconPlus)
-                                    let divScriptName = this.create.Element('div', { class: '' })
-                                        cookie_li.appendChild(divScriptName)
-                                            // title
-                                            let h2_li = document.createElement('h2')
-                                                h2_li.innerHTML = this.render.TitleCase(title)
-                                                divScriptName.appendChild(h2_li)
-                                            // purposes
-                                            let span_li = document.createElement('small')
-                                                span_li.innerHTML = this.render.TitleCase('Purposes: ' + category)
-                                                divScriptName.appendChild(span_li)
-                                    // checkbox
-                                    // TODO.. incluir botao badge pra identificar o status
+                                
+                                let checkbox = this.render.layoutElements.checkbox(title, cookie_name, always_active)
+                                cookie_li_data.appendChild(checkbox)
+                               
+                            } else {
+                                // console.log('elemento existe, deve achar o elemento e adicionar a lista do seletor')
+                                let cookie_li_data = get_list(purpose)
+
+                                let checkbox = this.render.layoutElements.checkbox(title, cookie_name, always_active)
+                                cookie_li_data.appendChild(checkbox)
+                            }
+                                
+                        }
+                        
+                        let back_footer = this.create.Element('div', { class: 'back_footer'})
+                            cookie_options.appendChild(back_footer)
+                            let confirm_cookies = this.create.Element('input', { 
+                                id: 'confirmCookies', 
+                                type: 'submit', 
+                                value: this.Config.lang.en.consent_btn_confirm
+                            })
+                            back_footer.appendChild(confirm_cookies)
+                            let iconConfirmChoices = this.create.Element('span', { class: 'material-symbols-outlined'})
+                                iconConfirmChoices.innerHTML = 'cookie'
+                                confirm_cookies.prepend(iconConfirmChoices)
+                return div_back;
+            }, // end back_categorized
+            back : (param)=> {
+                // div back
+                let div_back = this.create.Element('div', { class: 'back' })
+                // div_cookie.appendChild(div_back)
+                    let div_header_cookies = this.create.Element('div', { class: 'header-cookies' })
+                    div_back.appendChild(div_header_cookies)
+                        let div_back_icons = this.create.Element('div', { class: 'back_icons' })
+                        div_header_cookies.appendChild(div_back_icons)
+                            if (param != 'no_button'){
+                                // render back button
+                                let div_back_icon = this.create.Element('div', { class: 'back_icon' })
+                                    div_back_icons.appendChild(div_back_icon)
+                                        this.render.IconBack(div_back_icon)
+                            }
+                            
+                            let div_back_title = this.create.Element('h1', { class: '' })
+                            div_back_title.innerHTML = 'Manage Consent Preferences'
+                            div_header_cookies.appendChild(div_back_title)
+                    //
+                    // generating form
+                    let cookie_options = this.create.Element('form', { class: 'cookie_options' })
+                        div_back.appendChild(cookie_options)
+                        // generating UL
+                        let cookie_options_tab = this.create.Element('ul', { class: 'tab tab_consent_form' })
+                        cookie_options.prepend(cookie_options_tab)
+                            // necessary cookies
+                            let cookie_li = document.createElement('li')
+                            cookie_options_tab.appendChild(cookie_li)
+                                let iconPlus = this.create.Element('i', { class: 'material-symbols-outlined' })
+                                iconPlus.innerHTML = 'add'
+                                cookie_li.appendChild(iconPlus)
+                                let h2_li = document.createElement('h2')
+                                h2_li.innerHTML = 'Strictly Necessary Cookies'
+                                cookie_li.appendChild(h2_li)
+                                let span_badge = this.render.badge('Always Active', 'default')
+                                cookie_li.appendChild(span_badge)
+                            let cookie_li_data = this.create.Element('div', { class: 'data2' })
+                            cookie_options_tab.appendChild(cookie_li_data)
+                                let cookie_li_data_p = document.createElement('p')
+                                cookie_li_data_p.innerHTML = 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.'
+                                cookie_li_data.appendChild(cookie_li_data_p)
+                        //
+                        // cria os elementos baseados no consent config object
+                        for (let i = 0; i < this.configCookies.length; i++){
+                            let cookie_name = this.configCookies[i].label
+                            let description_cookie = this.configCookies[i].description
+                            let title = this.configCookies[i].title
+                            let category = this.configCookies[i].purpose
+                            let necessary = this.configCookies[i].needed
+                            // let title = cookie_name == 'giveaway' ? 'Third-Party Cookies' : cookie_name + ' Cookies'
+                            let cookie_li = document.createElement('li')
+                            cookie_options_tab.appendChild(cookie_li)
+                                let iconPlus = this.create.Element('i', { class: 'material-symbols-outlined' })
+                                iconPlus.innerHTML = 'add'
+                                cookie_li.appendChild(iconPlus)
+                                let divScriptName = this.create.Element('div', { class: '' })
+                                    cookie_li.appendChild(divScriptName)
+                                        // title
+                                        let h2_li = document.createElement('h2')
+                                            h2_li.innerHTML = this.render.TitleCase(title)
+                                            divScriptName.appendChild(h2_li)
+                                        // purposes
+                                        let span_li = document.createElement('small')
+                                            span_li.innerHTML = this.render.TitleCase('Purposes: ' + category)
+                                            divScriptName.appendChild(span_li)
+                                // checkbox
+                                if(necessary != true) {
                                     let status = this.render.badge(this.Config.lang.en.default_statusInactive, 'status default')
                                     status.setAttribute('id', cookie_name+'_status')
                                     cookie_li.appendChild(status)
-
+    
                                     let label_checkbox = this.create.Element('label', { class: 'custom_checkbox' })
                                     cookie_li.appendChild(label_checkbox)
                                     let input_checkbox = this.create.Element('input', { 
@@ -855,31 +995,36 @@ class Cookie {
                                     label_checkbox.appendChild(input_checkbox)
                                     let span_toogle = this.create.Element('span', {class: 'toogle'})
                                     label_checkbox.appendChild(span_toogle)
-                        
-                                let cookie_li_data = this.create.Element('div', { class: 'data2' })
-                                cookie_options_tab.appendChild(cookie_li_data)
-                                    let cookie_li_data_p = document.createElement('p')
-                                        // description
-                                        cookie_li_data_p.innerHTML = description_cookie
-                                        cookie_li_data.appendChild(cookie_li_data_p)
-                            }
-                            //
-                            let back_footer = this.create.Element('div', { class: 'back_footer'})
-                                cookie_options.appendChild(back_footer)
-                                let confirm_cookies = this.create.Element('input', { 
-                                    id: 'confirmCookies', 
-                                    type: 'submit', 
-                                    value: this.Config.lang.en.consent_btn_confirm
-                                })
-                                back_footer.appendChild(confirm_cookies)
-                                let iconConfirmChoices = this.create.Element('span', { class: 'material-symbols-outlined'})
-                                    iconConfirmChoices.innerHTML = 'cookie'
-                                    confirm_cookies.prepend(iconConfirmChoices)
-            
-                //
-                // Generating COokie Floater Button 
+                                }else {
+                                    let status = this.render.badge(this.Config.lang.en.default_statusActive, 'status success always_active')
+                                    status.setAttribute('id', cookie_name+'_status')
+                                    cookie_li.appendChild(status)
+                                }
+                    
+                            let cookie_li_data = this.create.Element('div', { class: 'data2' })
+                            cookie_options_tab.appendChild(cookie_li_data)
+                                let cookie_li_data_p = document.createElement('p')
+                                    // description
+                                    cookie_li_data_p.innerHTML = description_cookie
+                                    cookie_li_data.appendChild(cookie_li_data_p)
+                        }
+                        //
+                        let back_footer = this.create.Element('div', { class: 'back_footer'})
+                            cookie_options.appendChild(back_footer)
+                            let confirm_cookies = this.create.Element('input', { 
+                                id: 'confirmCookies', 
+                                type: 'submit', 
+                                value: this.Config.lang.en.consent_btn_confirm
+                            })
+                            back_footer.appendChild(confirm_cookies)
+                            let iconConfirmChoices = this.create.Element('span', { class: 'material-symbols-outlined'})
+                                iconConfirmChoices.innerHTML = 'cookie'
+                                confirm_cookies.prepend(iconConfirmChoices)
+                return div_back;
+            }, // end back
+            floater : ()=> {
                 let floater = this.create.Element('div', { class: 'cookie_floater', style: 'display:none' })
-                    div_cookie_wrapper.after(floater)
+                    // div_cookie_wrapper.after(floater)
                     // let cookie_img = this.create.Element('img', { alt: 'Cookie Privacy Settings', src: this.settings.iconPreferences })
                     // floater.appendChild(cookie_img)      
                     let span_settings = document.createElement('div') 
@@ -890,8 +1035,9 @@ class Cookie {
                         let settingsIconFloater = this.create.Element('span', { class: 'material-symbols-outlined'})
                             settingsIconFloater.innerHTML = 'cookie'
                             span_settings.prepend(settingsIconFloater)
-                    
-                //
+                return floater;
+            }, // end floater
+            consent_bar : ()=> {
                 // Generating Consent Bar
                 let consent_bar = this.create.Element('div', { 
                     id: 'cconsent-bar',
@@ -901,7 +1047,7 @@ class Cookie {
                     'aria-hidden': false,
                     tabindex: 0
                 })
-                floater.after(consent_bar)
+                // floater.after(consent_bar)
                     let cc_wrapper = this.create.Element('div', { class: 'ccb__wrapper'})
                         consent_bar.appendChild(cc_wrapper)
                         let cc_left = this.create.Element('div', { class: 'ccb__left'})
@@ -923,18 +1069,89 @@ class Cookie {
                                 buttonEdit.innerHTML = 'Privacy Settings'
                                 cc_button.appendChild(buttonEdit)
                                 
+                                let buttonReject = this.create.Element('button', {
+                                    class: 'reject__consent',
+                                    type: 'button',
+                                    id: 'declineCookies'
+                                })
+                                buttonReject.innerHTML = this.Config.lang.en.consent_btn_reject
+                                cc_button.appendChild(buttonReject)
+                                // let cookieIcon_reject = this.create.Element('span', { class: 'material-symbols-outlined'})
+                                //     cookieIcon_reject.innerHTML = 'block'
+                                //     buttonReject.prepend(cookieIcon_reject)
+
                                 let buttonConsent = this.create.Element('button', {
                                     class: 'consent__give',
                                     type: 'submit',
                                 })
                                 buttonConsent.innerHTML = this.Config.lang.en.consent_btn_accept
                                 cc_button.appendChild(buttonConsent)
-                                
                                 // '<span class="material-symbols-outlined">cookie</span>'
                                 let cookieIcon = this.create.Element('span', { class: 'material-symbols-outlined'})
                                     cookieIcon.innerHTML = 'cookie'
                                     buttonConsent.prepend(cookieIcon)
+                return consent_bar;
+            }, // end consent_bar
+            li_content : (purpose, title, description)=> {
+                let cookie_li = this.create.Element('li', { class: purpose + '_list' })
+                    // cookie_options_tab.appendChild(cookie_li)
+                    let iconPlus = this.create.Element('i', { class: 'material-symbols-outlined' })
+                        iconPlus.innerHTML = 'add'
+                        cookie_li.appendChild(iconPlus)
+                        let divScriptName = this.create.Element('div', { class: '' })
+                            cookie_li.appendChild(divScriptName)
+                                // title
+                                let h2_li = document.createElement('h2')
+                                    h2_li.innerHTML = this.render.TitleCase(title)
+                                    // h2_li.innerHTML = this.render.TitleCase(title)
+                                    divScriptName.appendChild(h2_li)
+                                    if (purpose == 'necessary') {
+                                        let span_badge = this.render.badge('Always Active', 'success always_active')
+                                            cookie_li.appendChild(span_badge)
+                                        let span_li = document.createElement('small')
+                                        // TODO...
+                                        // let description = this.Config.lang.en.necessary_cookies_description
+                                        // span_li.innerHTML = description
+                                        // divScriptName.appendChild(span_li)
+                                    } 
+                                        // purposes
+                                        let span_li = document.createElement('small')
+                                            span_li.innerHTML = description
+                                            // span_li.innerHTML = this.render.TitleCase('Purposes: ' + category)
+                                            divScriptName.appendChild(span_li)
+                return cookie_li;
+            }, // end of li_content
+            checkbox : (title, cookie_name, necessary = false)=> {
+                // let cookie_li_data = this.create.Element('div', { class: 'data_category data_' + purpose })
+                // cookie_options_tab.appendChild(cookie_li_data)
+                    let cookie_li_data_li = document.createElement('li')
+                        // description
+                        cookie_li_data_li.innerHTML = this.render.TitleCase(title)
+                        // cookie_li_data.appendChild(cookie_li_data_li)
+                        // checkbox
+                        if (!necessary) {
+                            let status = this.render.badge(this.Config.lang.en.default_statusInactive, 'status default')
+                            status.setAttribute('id', cookie_name+'_status')
+                            cookie_li_data_li.appendChild(status)
+                                let label_checkbox = this.create.Element('label', { class: 'custom_checkbox' })
+                            cookie_li_data_li.appendChild(label_checkbox)
+                            let input_checkbox = this.create.Element('input', { 
+                                type: 'checkbox',
+                                'data-function': cookie_name,
+                                id: 'chk_' + cookie_name,
+                            })
+                            label_checkbox.appendChild(input_checkbox)
+                            let span_toogle = this.create.Element('span', {class: 'toogle'})
+                            label_checkbox.appendChild(span_toogle)
+                        } else {
+                            let status = this.render.badge(this.Config.lang.en.default_statusActive, 'status success always_active')
+                            status.setAttribute('id', cookie_name+'_status')
+                            cookie_li_data_li.appendChild(status)
+                        }
+                return cookie_li_data_li
+            }, // end checkbox list
         }
+
             
     }
     // render end
@@ -966,22 +1183,30 @@ class Cookie {
             
         bake: (preferences, action = 'setCookie', form = false) => {
             // prepareCookies tem por padrao a ação de inserir 'setCookie' ex: manage.getCookie('_ga') and delete him
+            
             this.setAllConsent = (value) => {
                 // console.log(this.configCookies)
                 for (let i=0; i < this.configCookies.length; i++){
                     let n = this.configCookies[i].label
                     // let content = this.configCookies[i][1]
+                    // console.log(this.configCookies[i].needed)
+                    let needed = this.configCookies[i].needed
+                    let verified_value = value
                     this.settings.consent.cookies[n] = {}
-                    this.settings.consent.cookies[n].wanted = value
+                    if (needed == true) {
+                        console.log('this needed')
+                        verified_value = true
+                        this.settings.consent.cookies[n].needed = verified_value
+                    }
+                    this.settings.consent.cookies[n].wanted = verified_value
                     // this.Config.consent.cookies[n].script = content.script
                 }
             }
             // 
             this.setConsentByForm = (preferences) => {
-                // reset all preferences to false
+                // reset all preferences to false before
                 this.setAllConsent(false)
                 // set all preferences selected by user
-
                 for (let i=0; i < preferences.length; i++){
                     let n = preferences[i]
                     this.settings.consent.cookies[n] = {}
@@ -990,16 +1215,7 @@ class Cookie {
             }
             if (action === 'setCookie') {
                 if (preferences.length === 0){
-                    // user declined consent
-                    // TODO.. need detect and exclude _ga and _gi if exist to complete the remotion of analytics cookies
-                    
-                    // setAllConsent(false)
-                    // this.Config.consent.value = false
-                    // manage.setLocalStorage(defaultConsentName, 'declined')
-                    // if(manage.getLocalStorage(defaultConsentName)){
-                    //     manage.deleteLocalStorage(defaultConsentName)
-                    // }
-                    // Consent.set(JSON.stringify(this.Config.consent))
+                    // user has declined consent
                     this.manage.clearLocal()
                     this.manage.clearSession()
                     this.consent.clearCookies()
@@ -1010,6 +1226,7 @@ class Cookie {
                     }, "1500") 
                 }
                 if(form === true) {
+                    // user has selected the privacy settings on form
                     // this.manage.clearLocal()
                     // this.manage.clearSession()
                     // this.consent.clearCookies()
@@ -1031,8 +1248,8 @@ class Cookie {
                     }, "1500") 
                 }
             } else if (action === 'deleteCookie') {
-                Consent.clearCookies()
-                setAllConsent(false)
+                this.consent.clearCookies()
+                this.setAllConsent(false)
                 // this.settings.consent.value = false
                 this.consent.set(JSON.stringify(this.settings.consent))
                 this.manage.setLocalStorage(this.defaultConsentName, 0) // declined
@@ -1092,6 +1309,7 @@ class Cookie {
                     useJsCDN: d.preferences.useJsCDN === undefined ? this.Default.useJsCDN : d.preferences.useJsCDN,
                     useCssCDN: d.preferences.useCssCDN === undefined ? this.Default.useCssCDN : d.preferences.useCssCDN,
                     iconPreferences: d.preferences.iconPreferences === undefined ? this.Default.iconPreferences : d.preferences.iconPreferences,
+                    layout: d.preferences.layout === undefined ? this.Default.layout : d.preferences.layout,
                     // base_local: d.preferences.base_local === undefined ? this.Default.base_local : d.preferences.base_local,
                     base_local: this.Default.base_local,
                     cssIncludes: (d.preferences.cssIncludes === undefined || d.preferences.cssIncludes < 1) ? this.Default.cssIncludes : d.preferences.cssIncludes,
@@ -1119,7 +1337,6 @@ class Cookie {
 
         }).then( () => {
             
-            // TODO..
             // need validate user account here, check domain and if is a valid user
             if (this.cookieService == true){
                 // verify first if cookie service is active
@@ -1136,68 +1353,28 @@ class Cookie {
                     }
             
                     // render the html elements
-                    this.render.CookieSettingsElements()
+                    const __renderLayout = this.settings.layout
+                    console.log(__renderLayout)
+
+                    this.render.CookieSettingsElements(__renderLayout)
                     this.consent.validate(this.defaultCookieName, this.configCookies)
                     this.consent.checkConfig(this.defaultCookieName)
 
                     //-------------------------------------------------------
                     // Objects Definition
                     //-------------------------------------------------------
+                    //-------------------------------------------------------
                     const close = document.querySelector(".close");
                     const cookieWrapper = document.querySelector(".cookie_wrapper");
-                    // const front = document.querySelector(".front");
                     const back = document.querySelector(".back");
-                    // const more = document.querySelector("#more_cookie");
-                    // const backicon = document.querySelector(".back_icon");
                     const cookieFloater = document.querySelector(".cookie_floater");
-                    // const allowCookies = document.querySelector('#allowCookies');
-                    // const declineCookies = document.querySelector('#declineCookies');
                     const confirmCookies = document.querySelector('#confirmCookies');
                     const cookieSettings = document.querySelector(".ccb__edit")
                     const consentGive = document.querySelector(".consent__give")
                     const cookieConsentBar = document.querySelector("#cconsent-bar")
-            
-                    // more.addEventListener("click", () => {
-                    //     cookieMorePreferences()
-                    // });
-            
-                    // backicon.addEventListener("click", () => {
-                    // cookiePreferences()
-                    // });
-            
-                    const tab = document.querySelector(".tab");
-                    const liEl = tab.getElementsByTagName("li");
-            
-                    for (let i = 0; i < liEl.length; i++) {
-                        const element = liEl[i];
-                        element.addEventListener("click", function () {
-                            const iEl = element.getElementsByTagName("i")[0];
-                            const input = element.getElementsByTagName("input")[0];
-                            const badge = element.getElementsByClassName("status")[0];
-                            const data = element.nextElementSibling;
-                            const config = new ConfigSetup()
-                            if (iEl.className == "far fa-minus") {
-                                iEl.classList.value = "fas fa-plus";
-                            } else {
-                                iEl.classList.value = "far fa-minus";
-                            }
-                            data.classList.toggle("active");
-                            if(input != undefined) {
-                                if(input.checked === true) {
-                                    badge.classList.add('success')
-                                    badge.classList.remove('default')
-                                    badge.innerHTML = config.lang.en.default_statusActive
-                                } else {
-                                    badge.classList.add('default')
-                                    badge.classList.remove('success')
-                                    badge.innerHTML = config.lang.en.default_statusInactive
-                                }
-                            }
-                        });
-                    }
-                    
                     //-------------------------------------------------------
-                    // Visual Actions
+                    //-------------------------------------------------------
+                    // Coomon Visual Actions
                     //-------------------------------------------------------
                     
                     this.consentBarHide = () => {
@@ -1215,18 +1392,117 @@ class Cookie {
                         cookieWrapper.style.display = "flex";
                         cookieFloater.style.display = "none";
                     }
-                    this.privacySettings = () => {
-                        back.style.display = "flex";
-                        // front.style.display = "flex";
-                    }
-                    this.cookieMorePreferences = () => {
-                        // front.style.display = "none";
-                        this.consentBarHide()
-                        back.style.display = "flex";
-                    }
-            
+                    
+                    const rejectCookies = document.querySelector('.reject__consent');
+                    rejectCookies.addEventListener("click", ()=> {
+                        this.Data.bake(this.Data.getAllPref(), 'deleteCookie')
+                        this.floaterVisible()
+                    });
                     //-------------------------------------------------------
-                    // Event Listeners
+                    // Render layout option particularities start
+                    if (__renderLayout != 'simple' && __renderLayout != 'categorized') {
+                        const front = document.querySelector(".front");
+                        const more = document.querySelector("#more_cookie");
+                        const backicon = document.querySelector(".back_icon");
+                        const allowCookies = document.querySelector('#allowCookies');
+                        const declineCookies = document.querySelector('#declineCookies');
+                    
+                    //-------------------------------------------------------
+                    
+                        
+
+
+                        this.cookieMorePreferences = () => {
+                            front.style.display = "none";
+                            back.style.display = "flex";
+                            // this.consentBarHide()
+                            // front.style.display = "flex";
+                        }
+                        this.cookiePreferences = () => {
+                            front.style.display = "flex";
+                            back.style.display = "none";
+                            // this.consentBarHide()
+                            // front.style.display = "flex";
+                        }
+
+                        this.privacySettings = () => {
+                            back.style.display = "none";
+                            front.style.display = "flex";
+                        }
+                        
+                        //-------------------------------------------------------
+                
+                        // UI Banner Mode
+                        back.style.display = "none"; //full notice banner with all options
+                        // front.style.display = "none"; //simple banner without front manager notice
+                        allowCookies.addEventListener("click", ()=> {
+                            this.Data.bake(this.Data.getAllPref(), 'setCookie')
+                            this.floaterVisible()
+                        });
+                
+                        declineCookies.addEventListener("click", ()=> {
+                            this.Data.bake(this.Data.getAllPref(), 'deleteCookie')
+                            this.floaterVisible()
+                        });
+    
+                        more.addEventListener("click", () => {
+                            this.cookieMorePreferences()
+                        });
+                        
+                        backicon.addEventListener("click", () => {
+                            this.cookiePreferences()
+                        });
+                        
+                    } else { 
+                        // layout mode == 'simple'
+                        // simple layout should use the front manager page on open privacy settings.
+                        this.privacySettings = () => {
+                            back.style.display = "flex";
+                        }
+                    }
+                    // Layout mode particularities end
+                    //-------------------------------------------------------
+                    // control banner collapsible and checkboxes
+                    const tab = document.querySelector(".tab");
+                    const liEl = tab.getElementsByTagName("li");
+                    
+                    // setup toggle collapsible and status badge
+                    for (let i = 0; i < liEl.length; i++) {
+                        const element = liEl[i];
+                        element.addEventListener("click", function () {
+                            const iEl = element.getElementsByTagName("i")[0];
+                            const input = element.getElementsByTagName("input")[0];
+                            const badge = element.getElementsByClassName("status")[0];
+                            const data = element.nextElementSibling;
+                            const config = new ConfigSetup()
+                            if (iEl.innerHTML == "remove") {
+                                iEl.innerHTML = "add";
+                            } else {
+                                iEl.innerHTML = "remove";
+                            }
+                            // if (iEl.className == "far fa-minus") {
+                            //     iEl.classList.value = "fas fa-plus";
+                            // } else {
+                            //     iEl.classList.value = "far fa-minus";
+                            // }
+                            data.classList.toggle("active");
+                            if(input != undefined) {
+                                if(input.checked === true) {
+                                    badge.classList.add('success')
+                                    badge.classList.remove('default')
+                                    badge.innerHTML = config.lang.en.default_statusActive
+                                } else {
+                                    badge.classList.add('default')
+                                    badge.classList.remove('success')
+                                    badge.innerHTML = config.lang.en.default_statusInactive
+                                }
+                            }
+                        });
+                    }
+
+                    
+                    //-------------------------------------------------------
+                    // Common Event Listeners
                     //-------------------------------------------------------
             
                     cookieSettings.addEventListener("click", () => {
@@ -1252,11 +1528,26 @@ class Cookie {
                         this.floaterVisible()
                     })
             
+                    
+
+                    
+                    cookieFloater.addEventListener("click", () => {
+                        this.privacySettings()
+                        // back.style.display = "flex";
+                        // cookieWrapper.style.display = "flex";
+                        // cookieFloater.style.display = "none";
+                        this.floaterHide()
+                    })
+                    
                     // const name = this.settings.name === undefined ? Default.name : this.settings.name
+                    
                     const c = this.manage.getCookie(this.defaultCookieName)
+                    let localCookies = this.manage.localCookies(this.defaultCookieName)
+                    let localStorageSettings = this.manage.getLocalStorage(this.defaultConsentName) // check local storage
+                    
                     
                     close.addEventListener("click", () => {
-                        if (!c){
+                        if (!c && !localStorageSettings){
                             this.consentBarShow() // *(deprecated)
                             // cookieConsentBar.classList.remove('collapse')
                             cookieWrapper.style.display = "none";
@@ -1267,27 +1558,11 @@ class Cookie {
                         }
                         this.consent.resetSelectors(this.defaultCookieName)
                     })
-            
-                    cookieFloater.addEventListener("click", () => {
-                        this.privacySettings()
-                        // back.style.display = "flex";
-                        // cookieWrapper.style.display = "flex";
-                        // cookieFloater.style.display = "none";
-                        this.floaterHide()
-                    })
-                    // allowCookies.addEventListener("click", ()=> {
-                    //     Cookie.bake(getAllPref(), setCookie)
-                    //     floaterVisible()
-            
-                    // });
-            
-                    // declineCookies.addEventListener("click", ()=> {
-                    //     Cookie.bake(getAllPref(), deleteCookie)
-                    //     floaterVisible()
-                    // });
-            
-                    let localCookies = this.manage.localCookies(this.defaultCookieName)
-                    if (localCookies) {
+                    
+                    //-------------------------------------------------------
+                    // Check local user config to set the first consent notice behaviour based on user preferences
+                    //-------------------------------------------------------
+                    if (localCookies) { // have cookies preferences
                         if (localCookies.value === false) {
                             // this.consentBarShow()
                             cookieConsentBar.classList.remove('collapse')
@@ -1296,18 +1571,32 @@ class Cookie {
                             cookieWrapper.style.display = "none";
                             cookieFloater.style.display = "flex";
                         }
-                    } else {
-                        // this.consentBarShow()
-                        cookieConsentBar.classList.remove('collapse')
+                    } else if(!c && !localStorageSettings){ // dont have cookies preferences yet
+                        this.consentBarShow()
+                    } else if(localStorageSettings == 0){ // have preferences and declined all cookies possible
+                        this.floaterVisible()
+
                     }
+                    // } else {
+                    //     // this.consentBarShow()
+                    //     if (localStorageSettings == 0){
+                    //         this.floaterVisible()
+                    //     }else {
+                    //         cookieConsentBar.classList.remove('collapse')
+                    //     }
+                    // }
             
                     this.resize()
+
+                    //-------------------------------------------------------
 
                 }
                 else {
                     console.log('error: Not valid domain, please check cookies config or contact website support')
                     return false
                 }
+                //
+                //-------------------------------------------------------
                 //
             }
 
@@ -1369,24 +1658,31 @@ class ConfigSetup {
             // General
                 default_statusInactive : 'Off',
                 default_statusActive : 'Active',
+                always_active : 'Always Active',
             // Form
                 consent_bar_message : 'This website uses cookies to ensure you get the best experience on our website.',
                 consent_btn_accept : 'Accept Cookies',
-                consent_btn_confirm: 'Save my Settings'
+                consent_btn_reject : 'Reject',
+                consent_btn_confirm: 'Save my Settings',
+            // Consent
+                necessary_cookies_description : 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.'
             }
         },
 
         this.default = {
             name: 'Cookie Consent',
             prefix: '_ccm',
-            url: 'https://cookies.marcelomotta.com/',
+            // url: 'https://cookies.marcelomotta.com/', // main url to get api call in this case, same base_url of system config
+            url: 'http://localhost/dev/devakumaran/cookies_consent_master/', // developing
             urlProject: 'https://github.com/marc310/cookie-consent/',
             apiCall: 'api/cookies/property/code/',
             description: 'Cookie notice bars are not enough!',
+            layout: 'default',
             terms: 'terms.html',
             privacy: 'privacy.html',
             iconPreferences: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/img/cookie_1f36a.png',
-            cdnUrl: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/v1.2.6/',
+            // cdnUrl: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/api/v1.2.6/',
+            cdnUrl: 'http://localhost/dev/devakumaran/cookies_consent_master/src/plugins/cookies-consent/dev/v1.2.8/', // developing
             cssCDN: 'assets/css/cookies.css',
             jsCDN: 'assets/js/Cookie.js',
             base_local: './src/plugins/cookies-consent/dist/',
