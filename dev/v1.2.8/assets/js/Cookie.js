@@ -390,13 +390,14 @@ class Cookie {
     
         validate: (defaultname, configCookies) => {
             // let configCookies = Object.entries(Config.Cookies.template)
-
             let arrayCookies = this.manage.arrayCookies(defaultname)
             let localCookies = this.manage.localCookies(defaultname)
+
             let localStorageSettings = this.manage.getLocalStorage(this.defaultConsentName) // accepted
             if(arrayCookies){
                 if(arrayCookies.length != configCookies.length){
                     this.manage.deleteCookie(this.defaultCookieName)
+                    this.manage.deleteLocalStorage(this.defaultConsentName)
                 }
             }
             if(localCookies === null || !localCookies.cookies.analytics || localCookies.cookies.analytics.wanted != true){
@@ -408,6 +409,7 @@ class Cookie {
                 // retorna true se for diferente
                 if (version === true) {
                     this.manage.deleteCookie(this.defaultCookieName)
+                    this.manage.deleteLocalStorage(this.defaultConsentName)
                 }
             } 
             if (!localStorageSettings && localCookies){
@@ -697,6 +699,8 @@ class Cookie {
                     // param to back categorized : true = have button back, false = have no button back
                         let div_back = this.render.layoutElements.back_categorized(param == 'notice' ? true : false);
                         div_cookie.appendChild(div_back)
+                        //set data
+                        this.Data.setInfoAvailableApps()
                 //
                 // Generating COokie Floater Button 
                 let floater = this.render.layoutElements.floater()
@@ -857,7 +861,6 @@ class Cookie {
                             let always_active = this.configCookies[i].needed == true ? true : false
                             // let always_active = purpose == 'necessary' ? true : false
                             // console.log(purpose_description)
-                            // debugger
                             let list_exists = ()=> {
                                 let purpose_list = cookie_options_tab.querySelector('li.' + purpose + '_list')
                                 // console.log(purpose_list)
@@ -1114,7 +1117,7 @@ class Cookie {
                     let iconPlus = this.create.Element('i', { class: 'material-symbols-outlined' })
                         iconPlus.innerHTML = 'add'
                         cookie_li.appendChild(iconPlus)
-                        let divScriptName = this.create.Element('div', { class: '' })
+                        let divScriptName = this.create.Element('div', { class: 'title' })
                             cookie_li.appendChild(divScriptName)
                                 // title
                                 let h2_li = document.createElement('h2')
@@ -1160,9 +1163,20 @@ class Cookie {
                             let span_toogle = this.create.Element('span', {class: 'toogle'})
                             label_checkbox.appendChild(span_toogle)
                         } else {
+                            // necessary lists created without selector
                             let status = this.render.badge(this.Config.lang.en.default_statusActive, 'status success always_active')
                             status.setAttribute('id', cookie_name+'_status')
                             cookie_li_data_li.appendChild(status)
+                            let label_checkbox = this.create.Element('label', { class: 'custom_checkbox' })
+                            cookie_li_data_li.appendChild(label_checkbox)
+                            let input_checkbox = this.create.Element('input', { 
+                                type: 'checkbox',
+                                'data-function': cookie_name,
+                                id: 'chk_' + cookie_name,
+                                checked: 'checked',
+                                disabled: true
+                            })
+                            label_checkbox.appendChild(input_checkbox)
                         }
                 return cookie_li_data_li
             }, // end checkbox list
@@ -1185,7 +1199,8 @@ class Cookie {
         },
 
         getAllPref: () => {
-            return [...document.querySelectorAll('[data-function]')].filter((el) => el).map((el) => el.getAttribute('data-function'));
+            let value = [...document.querySelectorAll('[data-function]')].filter((el) => el).map((el) => el.getAttribute('data-function'))
+            return value;
         },
 
         list: () => {
@@ -1196,10 +1211,21 @@ class Cookie {
             }
             return aString;
         },
-            
+        setInfoAvailableApps: ()=> {
+            // let manager = document.getElementsByClassName('tab_consent_form')
+            let lists = document.querySelectorAll('.data_category')
+            for(let i=0 ; lists.length > i ; i++){
+                let count_apps = lists[i].childNodes.length - 1
+                let available_apps = count_apps + ' App' + (count_apps > 1 ? 's' : '')
+                let thisList = lists[i].previousSibling
+                let title = thisList.querySelector('.title')
+                let small = title.querySelector('small')
+                small.innerHTML = available_apps
+                // console.log(manager[0].children[i])
+            }
+        },
         bake: (preferences, action = 'setCookie', form = false) => {
             // prepareCookies tem por padrao a ação de inserir 'setCookie' ex: manage.getCookie('_ga') and delete him
-            
             this.setAllConsent = (value) => {
                 // console.log(this.configCookies)
                 for (let i=0; i < this.configCookies.length; i++){
@@ -1210,7 +1236,7 @@ class Cookie {
                     let verified_value = value
                     this.settings.consent.cookies[n] = {}
                     if (needed == true) {
-                        console.log('this needed')
+                        // console.log('this needed')
                         verified_value = true
                         this.settings.consent.cookies[n].needed = verified_value
                     }
@@ -1547,6 +1573,7 @@ class Cookie {
                         cookieConsentBar.classList.add('collapse')
                         // cookieWrapper.style.display = "none";
                         // cookieFloater.style.display = "flex";
+                        console.log('c')
                         this.consentBarHide()
                         this.floaterVisible()
                     })
