@@ -856,11 +856,8 @@ class Cookie {
                             let category = this.configCookies[i].purpose
                             let always_active = this.configCookies[i].needed == true ? true : false
                             // let always_active = purpose == 'necessary' ? true : false
-                            
-                            
                             // console.log(purpose_description)
                             // debugger
-
                             let list_exists = ()=> {
                                 let purpose_list = cookie_options_tab.querySelector('li.' + purpose + '_list')
                                 // console.log(purpose_list)
@@ -879,14 +876,13 @@ class Cookie {
                             let create_list = (purpose)=> {
                                 // cria elemento li
                                 let purpose_name = this.Config.lang.en[purpose].name
-                                let list_desc = this.Config.lang.en[purpose].ie
+                                // let list_desc = this.Config.lang.en[purpose].ie
 
-                                let cookie_li = this.render.layoutElements.li_content(purpose, purpose_name, list_desc)
+                                let cookie_li = this.render.layoutElements.li_content(purpose, purpose_name, '')
                                     return cookie_li;
                             }
                             let create_collapsible = (purpose)=> {
                                 let cookie_li_data = this.create.Element('div', { class: 'data_category data_' + purpose })
-                                    debugger
                                     return cookie_li_data
                             }
                             if (list_exists() == 400) { // returning 400 mean this element not exist
@@ -1325,6 +1321,7 @@ class Cookie {
                     useCssCDN: d.preferences.useCssCDN === undefined ? this.Default.useCssCDN : d.preferences.useCssCDN,
                     iconPreferences: d.preferences.iconPreferences === undefined ? this.Default.iconPreferences : d.preferences.iconPreferences,
                     layout: d.preferences.layout === undefined ? this.Default.layout : d.preferences.layout,
+                    bannerPosition: d.preferences.position === undefined ? this.Default.bannerPosition : d.preferences.position,
                     // base_local: d.preferences.base_local === undefined ? this.Default.base_local : d.preferences.base_local,
                     base_local: this.Default.base_local,
                     cssIncludes: (d.preferences.cssIncludes === undefined || d.preferences.cssIncludes < 1) ? this.Default.cssIncludes : d.preferences.cssIncludes,
@@ -1369,9 +1366,14 @@ class Cookie {
             
                     // render the html elements
                     const __renderLayout = this.settings.layout
-                    console.log(__renderLayout)
-
+                    
                     this.render.CookieSettingsElements(__renderLayout)
+                    // set consent bar position based on configs
+                    let consentBarPosition = document.getElementById('cconsent-bar')
+                    let setupPosition = this.settings.bannerPosition
+                    consentBarPosition.style[setupPosition] = 0
+                    console.log(setupPosition)
+                    // setting banner consent notice position
                     this.consent.validate(this.defaultCookieName, this.configCookies)
                     this.consent.checkConfig(this.defaultCookieName)
 
@@ -1708,6 +1710,7 @@ class ConfigSetup {
         this.default = {
             name: 'Cookie Consent Master',
             prefix: '_ccm',
+            bannerPosition: 'bottom',
             // url: 'https://cookies.marcelomotta.com/', // main url to get api call in this case, same base_url of system config
             url: 'http://localhost/dev/devakumaran/cookies_consent_master/', // developing
             urlProject: 'https://github.com/marc310/cookie-consent/',
