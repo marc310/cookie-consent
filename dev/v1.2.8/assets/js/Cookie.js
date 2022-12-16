@@ -805,14 +805,14 @@ class Cookie {
                 return div_front;
             //
             }, // end front
-            back_categorized : (button)=> {
+            back_categorized : (back_btn)=> {
                 // div back
                 let div_back = this.create.Element('div', { class: 'back' })
                 // div_cookie.appendChild(div_back)
                     let div_header_cookies = this.create.Element('div', { class: 'header-cookies' })
                     div_back.appendChild(div_header_cookies)
                     //
-                        if(button) {
+                        if(back_btn) {
                             let div_back_icons = this.create.Element('div', { class: 'back_icons' })
                             div_header_cookies.appendChild(div_back_icons)
                                 let div_back_icon = this.create.Element('div', { class: 'back_icon' })
@@ -856,6 +856,10 @@ class Cookie {
                             let category = this.configCookies[i].purpose
                             let always_active = this.configCookies[i].needed == true ? true : false
                             // let always_active = purpose == 'necessary' ? true : false
+                            
+                            
+                            // console.log(purpose_description)
+                            // debugger
 
                             let list_exists = ()=> {
                                 let purpose_list = cookie_options_tab.querySelector('li.' + purpose + '_list')
@@ -874,20 +878,31 @@ class Cookie {
                             }
                             let create_list = (purpose)=> {
                                 // cria elemento li
-                                let cookie_li = this.render.layoutElements.li_content(purpose, category, description)
+                                let purpose_name = this.Config.lang.en[purpose].name
+                                let list_desc = this.Config.lang.en[purpose].ie
+
+                                let cookie_li = this.render.layoutElements.li_content(purpose, purpose_name, list_desc)
                                     return cookie_li;
                             }
                             let create_collapsible = (purpose)=> {
                                 let cookie_li_data = this.create.Element('div', { class: 'data_category data_' + purpose })
+                                    debugger
                                     return cookie_li_data
                             }
-                            if (list_exists() == 400) {
+                            if (list_exists() == 400) { // returning 400 mean this element not exist
                                 let cookie_li = create_list(purpose)
                                 cookie_options_tab.appendChild(cookie_li) 
 
                                 let cookie_li_data = create_collapsible(purpose)
                                 cookie_options_tab.appendChild(cookie_li_data)
-                                
+                                // todo.. include first list with description
+                                let purpose_description = this.Config.lang.en[purpose].description
+                                    let list_description = this.create.Element('li', { class: purpose + '_description' })
+                                    cookie_li_data.appendChild(list_description)
+                                        let span = document.createElement('small')
+                                        span.innerHTML = purpose_description
+                                        list_description.appendChild(span)
+
                                 let checkbox = this.render.layoutElements.checkbox(title, cookie_name, always_active)
                                 cookie_li_data.appendChild(checkbox)
                                
@@ -899,7 +914,7 @@ class Cookie {
                                 cookie_li_data.appendChild(checkbox)
                             }
                                 
-                        }
+                        } // end list loop 
                         
                         let back_footer = this.create.Element('div', { class: 'back_footer'})
                             cookie_options.appendChild(back_footer)
@@ -1108,9 +1123,9 @@ class Cookie {
                                     if (purpose == 'necessary') {
                                         let span_badge = this.render.badge('Always Active', 'success always_active')
                                             cookie_li.appendChild(span_badge)
-                                        let span_li = document.createElement('small')
                                         // TODO...
-                                        // let description = this.Config.lang.en.necessary_cookies_description
+                                        // let span_li = document.createElement('small')
+                                        // let description = this.Config.lang.en.necessary
                                         // span_li.innerHTML = description
                                         // divScriptName.appendChild(span_li)
                                     } 
@@ -1663,14 +1678,35 @@ class ConfigSetup {
                 consent_bar_message : 'This website uses cookies to ensure you get the best experience on our website.',
                 consent_btn_accept : 'Accept Cookies',
                 consent_btn_reject : 'Reject',
-                consent_btn_confirm: 'Save my Settings',
-            // Consent
-                necessary_cookies_description : 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.'
+                consent_btn_confirm: 'Save Settings',
+            // Consent Lang Variables
+            // Script Purpose Descriptions and tagnames
+                necessary : {
+                    name: 'Strictly necessary',
+                    description : 'These cookies allow us or our third-party analytics providers to collect information and statistics on use of our services by you and other visitors. This information helps us to improve our services and products for the benefit of you and others.',
+                    ie : 'ie. Account login related cookies',
+                },
+                functionality : {
+                    name: 'Functionality',
+                    description: 'These cookies allow the site to provide enhanced functionality and personalisation. They may be set by us or by external suppliers whose services we have added to our pages. If you do not allow these cookies some or all of these features may not work properly.',
+                    ie : 'ie. remembering users choices',
+                },
+                tracking : {
+                    name: 'Tracking and Performance',
+                    description: 'These cookies allow us to count visits and traffic sources so that we can measure and improve the performance of our website. They help us to know which pages are the most and least popular and to see how visitors move around the website. All information collected by these cookies is aggregated and therefore anonymous. If you do not allow these cookies, we will not know when you have visited our site.',
+                    ie : 'ie. Google Analytics',
+                },
+                targeting : {
+                    name: 'Targeting and Advertising',
+                    description : 'These cookies may be set through our website by our advertising partners. They may be used by these companies to build a profile about your interests and show you relevant ads on other websites. They do not directly store personal information, but are based on uniquely identifying your browser and internet device. If you do not allow these cookies, you will get less targeted advertising.',
+                    ie : 'ie. Google AdSense',
+                },
+                
             }
         },
 
         this.default = {
-            name: 'Cookie Consent',
+            name: 'Cookie Consent Master',
             prefix: '_ccm',
             // url: 'https://cookies.marcelomotta.com/', // main url to get api call in this case, same base_url of system config
             url: 'http://localhost/dev/devakumaran/cookies_consent_master/', // developing
