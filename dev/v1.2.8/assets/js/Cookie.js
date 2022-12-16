@@ -1061,24 +1061,29 @@ class Cookie {
                 // floater.after(consent_bar)
                     let cc_wrapper = this.create.Element('div', { class: 'ccb__wrapper'})
                         consent_bar.appendChild(cc_wrapper)
+                        let cc_text = this.create.Element('div', { class: 'ccb__text'})
+                            // include title Notice
+                            // include text
+                            cc_text.innerHTML = this.settings.description
+                            cc_wrapper.appendChild(cc_text)
+                            let notice_title = document.createElement('h3')
+                                notice_title.innerHTML = 'Notice'
+                                cc_text.prepend(notice_title)
                         let cc_left = this.create.Element('div', { class: 'ccb__left'})
                             cc_wrapper.appendChild(cc_left)
-                            let cc_text = this.create.Element('div', { class: 'cc-text'})
-                                cc_text.innerHTML = this.settings.description
-                                // cc_text.innerHTML = this.Config.lang.en.consent_bar_message
-                                cc_left.appendChild(cc_text)
+                            let buttonEdit = this.create.Element('button', {
+                                class: 'ccb__edit',
+                                type: 'submit',
+                            })
+                            buttonEdit.innerHTML = 'Privacy Settings'
+                            cc_left.appendChild(buttonEdit)
                         //
                         let cc_right = this.create.Element('div', { class: 'ccb__right'})
                             cc_wrapper.appendChild(cc_right)
                             let cc_button = this.create.Element('div', { class: 'ccb__button'})
                                 cc_right.appendChild(cc_button)
             
-                                let buttonEdit = this.create.Element('button', {
-                                    class: 'ccb__edit',
-                                    type: 'submit',
-                                })
-                                buttonEdit.innerHTML = 'Privacy Settings'
-                                cc_button.appendChild(buttonEdit)
+                                
                                 
                                 let buttonReject = this.create.Element('button', {
                                     class: 'reject__consent',
@@ -1369,10 +1374,11 @@ class Cookie {
                     
                     this.render.CookieSettingsElements(__renderLayout)
                     // set consent bar position based on configs
-                    let consentBarPosition = document.getElementById('cconsent-bar')
-                    let setupPosition = this.settings.bannerPosition
-                    consentBarPosition.style[setupPosition] = 0
-                    console.log(setupPosition)
+                    let consentBarNotice = document.getElementById('cconsent-bar')
+                    consentBarNotice.classList.add(this.settings.bannerPosition);
+                    // let setupPosition = this.settings.bannerPosition
+                    // consentBarPosition.style[setupPosition] = 0
+                    // console.log(setupPosition)
                     // setting banner consent notice position
                     this.consent.validate(this.defaultCookieName, this.configCookies)
                     this.consent.checkConfig(this.defaultCookieName)
