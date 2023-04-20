@@ -204,3 +204,26 @@ function scanScripts(data){
 // headers: { 'Access-Control-Allow-Origin': '*' },
 // send data to
 // $('#siteloader').html(data);
+
+// c = document.cookie
+ 
+// arr = c.split(';')
+// json = JSON.stringify(arr)
+// j = JSON.parse(json)
+ 
+// for (let index = 0; index < j.length; index++) {
+//     console.log(j[index])
+// }
+ 
+// function check_cookie_name(name) 
+//     {
+//       var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+//       if (match) {
+//         console.log(match[2]);
+//       }
+//       else{
+//            console.log('--something went wrong---');
+//       }
+//    }
+ 
+// check_cookie_name('_ga')
