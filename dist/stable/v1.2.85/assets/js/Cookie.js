@@ -1843,7 +1843,7 @@ class ConfigSetup {
             terms: 'terms.html',
             privacy: 'privacy.html',
             iconPreferences: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@main/assets/img/cookie_1f36a.png',
-            cdnUrl: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@dev/dist/stable/v1.2.84',
+            cdnUrl: 'https://cdn.jsdelivr.net/gh/marc310/cookie-consent@dev/dist/stable/v1.2.85/',
             // cdnUrl: 'http://localhost/develop/clientes/dev/cookies_consent_master/src/plugins/cookies-consent/dev/v1.2.8/', // developing
             cssCDN: 'assets/css/cookies.css',
             jsCDN: 'assets/js/Cookie.js',
