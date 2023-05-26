@@ -446,6 +446,9 @@
   text-align: left;
   margin: 10px 0 15px 0;
 }
+#cconsent-bar .ccb__text {
+  color: #fff!important;
+}
 #cconsent-bar .ccb__title {
   display: flex;
   justify-content: space-between;
